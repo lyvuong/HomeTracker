@@ -648,6 +648,10 @@ export const App: React.FC = () => {
         homes={homes}
         activeHomeId={activeHomeId}
         onSelectHome={handleSelectHome}
+        onOpenAddService={() => {
+          setEditingRecord(null);
+          setIsServiceModalOpen(true);
+        }}
         onOpenAddHome={() => {
           setIsHomeModalOpen(true);
         }}
