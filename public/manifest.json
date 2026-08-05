@@ -1,0 +1,64 @@
+{
+  "short_name": "HomeTracker",
+  "name": "HomeTracker - Home Maintenance & Repair Log",
+  "description": "Progressive Web App for tracking home maintenance records, repair history, costs, and reminders.",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "display": "standalone",
+  "orientation": "any",
+  "categories": ["utilities", "productivity", "home"],
+  "shortcuts": [
+    {
+      "name": "Log Maintenance",
+      "short_name": "Log Service",
+      "description": "Quickly record a new maintenance or repair entry",
+      "url": "/?action=add-service",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Homes",
+      "short_name": "Homes",
+      "description": "View and manage registered home profiles",
+      "url": "/?action=homes",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
