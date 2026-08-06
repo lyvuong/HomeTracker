@@ -1,59 +1,72 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
   <defs>
-    <!-- Background Gradient -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="50%" stop-color="#0b1f1a" />
-      <stop offset="100%" stop-color="#020617" />
+    <!-- Soft Light Pastel Background Gradient -->
+    <linearGradient id="pastelBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EFF6FF" />
+      <stop offset="50%" stop-color="#ECFDF5" />
+      <stop offset="100%" stop-color="#E0F2FE" />
     </linearGradient>
 
-    <!-- Glowing Accent Gradient -->
-    <linearGradient id="emeraldTeal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#34d399" />
+    <!-- Vibrant Pastel Emerald Roof Gradient -->
+    <linearGradient id="emeraldRoof" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" />
       <stop offset="100%" stop-color="#059669" />
     </linearGradient>
 
-    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#34d399" stop-opacity="0.4" />
-      <stop offset="100%" stop-color="#1e293b" stop-opacity="0.2" />
+    <!-- Pastel Peach/Coral Accent Gradient -->
+    <linearGradient id="peachAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDBA74" />
+      <stop offset="100%" stop-color="#FB923C" />
+    </linearGradient>
+
+    <!-- Subtle Pastel Border Gradient -->
+    <linearGradient id="pastelBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#93C5FD" stop-opacity="0.6" />
     </linearGradient>
 
     <!-- Soft Ambient Glow Filter -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#10B981" flood-opacity="0.18" />
     </filter>
   </defs>
 
-  <!-- Background Base Squircle -->
-  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bgGrad)" />
-  <rect x="16" y="16" width="480" height="480" rx="108" stroke="url(#borderGrad)" stroke-width="4" />
+  <!-- Outer Rounded Squircle Base (Pastel Theme) -->
+  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#pastelBg)" />
+  <rect x="16" y="16" width="480" height="480" rx="108" stroke="url(#pastelBorder)" stroke-width="6" />
 
-  <!-- House Roof -->
-  <path d="M 130 240 L 256 130 L 382 240"
-        stroke="url(#emeraldTeal)"
-        stroke-width="26"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        filter="url(#glow)" />
+  <!-- Main House Structure Container -->
+  <g filter="url(#softShadow)">
+    <!-- House Roof -->
+    <path d="M 120 230 L 256 120 L 392 230"
+          stroke="url(#emeraldRoof)"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
 
-  <!-- House Body -->
-  <path d="M 160 220 V 370 C 160 378 167 385 175 385 H 337 C 345 385 352 378 352 370 V 220"
-        fill="#0f172a"
-        stroke="url(#emeraldTeal)"
-        stroke-width="20"
-        stroke-linejoin="round" />
+    <!-- House Body (Light Pastel Mint Fill) -->
+    <path d="M 152 215 V 360 C 152 375 165 388 180 388 H 332 C 347 388 360 375 360 360 V 215"
+          fill="#FFFFFF"
+          stroke="#10B981"
+          stroke-width="16"
+          stroke-linejoin="round" />
 
-  <!-- Door -->
-  <rect x="230" y="300" width="52" height="85" rx="6" fill="#064e3b" stroke="#34d399" stroke-width="8" />
+    <!-- Door (Soft Pastel Mint Teal) -->
+    <rect x="232" y="295" width="48" height="93" rx="8" fill="#D1FAE5" stroke="#059669" stroke-width="6" />
+    <!-- Door Knob -->
+    <circle cx="268" cy="342" r="5" fill="#059669" />
 
-  <!-- Window -->
-  <rect x="190" y="250" width="36" height="36" rx="4" fill="#064e3b" stroke="#34d399" stroke-width="6" />
-  <rect x="286" y="250" width="36" height="36" rx="4" fill="#064e3b" stroke="#34d399" stroke-width="6" />
+    <!-- Windows (Light Pastel Blue Tint) -->
+    <rect x="184" y="248" width="38" height="38" rx="6" fill="#E0F2FE" stroke="#34D399" stroke-width="6" />
+    <rect x="290" y="248" width="38" height="38" rx="6" fill="#E0F2FE" stroke="#34D399" stroke-width="6" />
 
-  <!-- Maintenance Wrench Check Accent -->
-  <path d="M 210 262 L 245 292 L 310 220"
-        stroke="#f8fafc"
-        stroke-width="0"
-        opacity="0" />
+    <!-- Wrench & Maintenance Pastel Badge Accent -->
+    <circle cx="370" cy="350" r="48" fill="#FFF7ED" stroke="url(#peachAccent)" stroke-width="8" />
+    <!-- Wrench Silhouette inside Badge -->
+    <path d="M 356 364 L 380 340 M 378 334 C 382 330 388 330 392 334 C 396 338 396 344 392 348 L 384 356"
+          stroke="#F97316"
+          stroke-width="7"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+  </g>
 </svg>
