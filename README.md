@@ -14,9 +14,10 @@ HomeTracker is a **companion app to [CarTracker](../CarTracker)** — it intenti
 ## ✨ Features
 
 - 🏠 **Home Portfolio Management**: Keep detailed profiles for every property — nickname, address, property type, year built, square footage, purchase date, and notes.
-- 📋 **Comprehensive Maintenance Logs**: Record maintenance and repairs (HVAC, Plumbing, Electrical, Roofing, Appliances, Landscaping, and more) with dates, itemized costs, payment types, contractors, and notes.
+- 📋 **Comprehensive Home Expense & Maintenance Logs**: Record maintenance, repairs, and homeownership expenses — HVAC, Plumbing, Electrical, Roofing, Appliances, Landscaping, Property Tax, Mortgage, Homeowners Insurance, HOA Fees, Home Warranty, and more — with dates, itemized costs, payment types, providers/contractors, and notes.
+- 🧾 **Tax Deductible Tracking**: Flag any log entry (e.g. Property Tax payments) as a tax-deductible expense; the flag auto-enables when the Property Tax category is selected.
 - ⏰ **Smart Maintenance Reminders**: Date-based and repeat-interval reminders so seasonal tasks (gutter cleaning, filter changes) never slip through the cracks.
-- 📊 **Interactive Financial Analytics**: Cost summaries per home, total lifetime maintenance expenses, and monthly cost breakdowns by category and type.
+- 📊 **Interactive Financial Analytics**: Cost summaries per home, total lifetime expenses, and monthly cost breakdowns by category and type.
 - 👨‍👩‍👧‍👦 **Shared Household Sync**: Real-time cross-device sync via a shared **Household Code** — the same code used in CarTracker joins the same household.
 - 👤 **Multi-User Audit Badges**: Every home card and maintenance log is tagged with audit metadata (`👤 Logged by [User]`, `✏️ Edited by [User]`).
 - 🔐 **Secure Google OAuth Gate**: Mandatory login screen with account picker.
@@ -122,6 +123,7 @@ Every maintenance log is split across two linked Firestore documents that share 
   | `category` | `string` | Free-form; HomeTracker auto-fills `"Home - {MaintenanceCategory} - {home.nickname}"` |
   | `paymentType` | `'Cash' \| 'Credit Card' \| 'Debit Card' \| 'Bank Transfer' \| 'Check' \| 'Other'` | |
   | `user` | `string` | Display name of whoever logged it |
+  | `isTaxDeductible` | `boolean?` | Marks the expense as tax-deductible (auto-set for Property Tax) |
 
 CarTracker's vehicle service records (in `records`) and HomeTracker's maintenance records (in `homeRecords`) both join against the same `transactions` collection by shared document ID — so a household's Cost Analytics in either app is reading from one combined ledger without any schema changes.
 
