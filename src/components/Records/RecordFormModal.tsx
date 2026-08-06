@@ -71,9 +71,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
 
   const handleCategoryChange = (newCategory: MaintenanceCategory) => {
     setCategory(newCategory);
-    if (newCategory === 'Property Tax') {
-      setIsTaxDeductible(true);
-    }
+    setIsTaxDeductible(newCategory === 'Property Tax');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
