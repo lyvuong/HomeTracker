@@ -1,12 +1,21 @@
-import type { Home, HomeRecord, HomeReminder, Transaction, EnrichedHomeRecord, FirebaseConfig } from '../types';
+import type { Home, HomeRecord, HomeReminder, Transaction, EnrichedHomeRecord, FirebaseConfig, PaymentTypeItem } from '../types';
 
 const HOMES_KEY = 'hometrack_homes_v1';
 const RECORDS_KEY = 'hometrack_records_v1';
 const TRANSACTIONS_KEY = 'hometrack_transactions_v1';
 const REMINDERS_KEY = 'hometrack_reminders_v1';
+const PAYMENT_TYPES_KEY = 'hometrack_payment_types_v1';
 const ACTIVE_HOME_KEY = 'hometrack_active_home_id';
 const FIREBASE_CONFIG_KEY = 'hometrack_firebase_config_custom';
 const FAMILY_CODE_KEY = 'hometrack_family_code';
+
+export const INITIAL_PAYMENT_TYPES: PaymentTypeItem[] = [
+  { id: 'pt-1', name: 'Cash', isSystemDefault: true, isDefault: true },
+  { id: 'pt-2', name: 'Credit Card', isSystemDefault: true },
+  { id: 'pt-3', name: 'Debit Card', isSystemDefault: true },
+  { id: 'pt-4', name: 'Bank Transfer', isSystemDefault: true },
+  { id: 'pt-5', name: 'Check', isSystemDefault: true }
+];
 
 export const INITIAL_HOMES: Home[] = [
   {
@@ -220,6 +229,29 @@ export const restoreSampleData = (): void => {
   saveLocalRecords(INITIAL_RECORDS);
   saveLocalTransactions(INITIAL_TRANSACTIONS);
   saveLocalReminders(INITIAL_REMINDERS);
+};
+
+export const loadLocalPaymentTypes = (): PaymentTypeItem[] => {
+  try {
+    const raw = localStorage.getItem(PAYMENT_TYPES_KEY);
+    if (!raw) {
+      localStorage.setItem(PAYMENT_TYPES_KEY, JSON.stringify(INITIAL_PAYMENT_TYPES));
+      return INITIAL_PAYMENT_TYPES;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_PAYMENT_TYPES;
+  } catch (err) {
+    console.error('Failed to load local payment types:', err);
+    return INITIAL_PAYMENT_TYPES;
+  }
+};
+
+export const saveLocalPaymentTypes = (paymentTypes: PaymentTypeItem[]): void => {
+  try {
+    localStorage.setItem(PAYMENT_TYPES_KEY, JSON.stringify(paymentTypes));
+  } catch (err) {
+    console.error('Failed to save local payment types:', err);
+  }
 };
 
 export const getStoredFirebaseConfig = (): FirebaseConfig | null => {

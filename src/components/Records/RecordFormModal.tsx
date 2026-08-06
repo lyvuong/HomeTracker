@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, Wrench, BellPlus, Landmark } from 'lucide-react';
-import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType } from '../../types';
+import React, { useState, useEffect, useMemo } from 'react';
+import { X, Save, Wrench, BellPlus, Landmark, Settings2 } from 'lucide-react';
+import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType, PaymentTypeItem } from '../../types';
 import { CATEGORIES, TYPES, getSubcategories } from '../../constants/categories';
 
 interface RecordFormModalProps {
@@ -10,9 +10,9 @@ interface RecordFormModalProps {
   homes: Home[];
   activeHomeId: string;
   initialRecord?: EnrichedHomeRecord | null;
+  paymentTypes?: PaymentTypeItem[];
+  onManagePaymentTypes?: () => void;
 }
-
-const PAYMENT_TYPES: PaymentType[] = ['Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 'Check', 'Other'];
 
 export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   isOpen,
@@ -20,8 +20,17 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   onSave,
   homes,
   activeHomeId,
-  initialRecord
+  initialRecord,
+  paymentTypes = [],
+  onManagePaymentTypes
 }) => {
+  const availablePaymentTypes = useMemo(() => {
+    const rawNames = (paymentTypes && paymentTypes.length > 0)
+      ? paymentTypes.map(p => p.name)
+      : ['Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 'Check', 'Other'];
+    const withoutCash = rawNames.filter(n => n.toLowerCase() !== 'cash');
+    return ['Cash', ...Array.from(new Set(withoutCash))];
+  }, [paymentTypes]);
   const [homeId, setHomeId] = useState(activeHomeId);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
@@ -216,13 +225,25 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Payment Type *</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-300">Payment Type *</label>
+                {onManagePaymentTypes && (
+                  <button
+                    type="button"
+                    onClick={onManagePaymentTypes}
+                    className="text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5"
+                    title="Payment Methods Info"
+                  >
+                    <Settings2 className="w-3 h-3" /> Info
+                  </button>
+                )}
+              </div>
               <select
                 value={paymentType}
                 onChange={(e) => setPaymentType(e.target.value as PaymentType)}
                 className="w-full glass-input text-white text-sm rounded-xl p-2.5 bg-slate-900"
               >
-                {PAYMENT_TYPES.map((p) => (
+                {availablePaymentTypes.map((p) => (
                   <option key={p} value={p}>{p}</option>
                 ))}
               </select>
