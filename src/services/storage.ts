@@ -246,7 +246,7 @@ export const setStoredFamilyCode = (code: string): void => {
 
 export const exportRecordsAsCSV = (records: EnrichedHomeRecord[], homes: Home[]): void => {
   const homeMap = new Map(homes.map(h => [h.id, h.nickname]));
-  const headers = ['Home', 'Date', 'Time', 'Category', 'Type', 'Cost ($)', 'Payment Type', 'Provider', 'Notes'];
+  const headers = ['Home', 'Date', 'Time', 'Category', 'Type', 'Cost ($)', 'Payment Type', 'Provider', 'Notes', 'Tax Deductible'];
   const rows = records.map(r => [
     `"${homeMap.get(r.homeId) || 'Unknown Home'}"`,
     `"${r.date}"`,
@@ -256,7 +256,8 @@ export const exportRecordsAsCSV = (records: EnrichedHomeRecord[], homes: Home[])
     r.cost.toFixed(2),
     `"${r.paymentType}"`,
     `"${(r.provider || '').replace(/"/g, '""')}"`,
-    `"${(r.notes || '').replace(/"/g, '""')}"`
+    `"${(r.notes || '').replace(/"/g, '""')}"`,
+    r.isTaxDeductible ? 'Yes' : 'No'
   ]);
 
   const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
@@ -264,7 +265,7 @@ export const exportRecordsAsCSV = (records: EnrichedHomeRecord[], homes: Home[])
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `HomeTracker_Maintenance_History_${new Date().toISOString().split('T')[0]}.csv`);
+  link.setAttribute('download', `HomeTracker_Expense_History_${new Date().toISOString().split('T')[0]}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

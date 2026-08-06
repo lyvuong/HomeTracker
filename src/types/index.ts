@@ -46,9 +46,14 @@ export type MaintenanceCategory =
   | 'Inspection'
   | 'Utilities'
   | 'General Repair'
+  | 'Property Tax'
+  | 'Mortgage'
+  | 'Homeowners Insurance'
+  | 'HOA Fees'
+  | 'Home Warranty'
   | 'Other';
 
-export type MaintenanceType = 'Maintenance' | 'Repair' | 'Upgrade' | 'Inspection';
+export type MaintenanceType = 'Maintenance' | 'Repair' | 'Upgrade' | 'Inspection' | 'Expense';
 
 export type PaymentType = 'Cash' | 'Credit Card' | 'Debit Card' | 'Bank Transfer' | 'Check' | 'Other';
 
@@ -67,6 +72,7 @@ export interface Transaction {
   category: string;
   paymentType: PaymentType;
   user: string;
+  isTaxDeductible?: boolean;
 }
 
 export interface HomeRecord {
@@ -90,6 +96,7 @@ export interface EnrichedHomeRecord extends HomeRecord {
   provider: string;
   notes?: string;
   paymentType: PaymentType;
+  isTaxDeductible?: boolean;
 }
 
 export interface HomeReminder {

@@ -373,7 +373,8 @@ export const App: React.FC = () => {
           cost: t.amount,
           provider: t.vendor,
           notes: t.notes,
-          paymentType: t.paymentType
+          paymentType: t.paymentType,
+          isTaxDeductible: t.isTaxDeductible
         };
       })
       .filter((r): r is EnrichedHomeRecord => r !== null)
@@ -484,7 +485,8 @@ export const App: React.FC = () => {
       notes: recordData.notes || '',
       category: buildTransactionCategory(category, home),
       paymentType: recordData.paymentType || 'Cash',
-      user: auditInfo?.displayName || 'Home Owner'
+      user: auditInfo?.displayName || 'Home Owner',
+      isTaxDeductible: recordData.isTaxDeductible ?? false
     };
 
     setRecords(prev => {

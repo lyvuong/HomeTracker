@@ -6,10 +6,12 @@ import {
   Download,
   Printer,
   Edit2,
-  Trash2
+  Trash2,
+  Landmark
 } from 'lucide-react';
 import type { Home, EnrichedHomeRecord } from '../../types';
 import { exportRecordsAsCSV } from '../../services/storage';
+import { CATEGORIES, TYPES } from '../../constants/categories';
 
 interface RecordHistoryProps {
   records: EnrichedHomeRecord[];
@@ -19,25 +21,6 @@ interface RecordHistoryProps {
   onEditRecord: (record: EnrichedHomeRecord) => void;
   onDeleteRecord: (id: string) => void;
 }
-
-const CATEGORIES = [
-  'HVAC',
-  'Plumbing',
-  'Electrical',
-  'Roofing',
-  'Appliances',
-  'Landscaping & Lawn',
-  'Pest Control',
-  'Painting',
-  'Flooring',
-  'Windows & Doors',
-  'Foundation & Structural',
-  'Renovation',
-  'Inspection',
-  'Utilities',
-  'General Repair',
-  'Other'
-];
 
 export const RecordHistory: React.FC<RecordHistoryProps> = ({
   records,
@@ -50,6 +33,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
   const [selectedHomeFilter, setSelectedHomeFilter] = useState<string>(activeHomeId || 'all');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('all');
+  const [taxDeductibleOnly, setTaxDeductibleOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'cost-desc'>('date-desc');
 
@@ -62,6 +46,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
       if (selectedHomeFilter !== 'all' && r.homeId !== selectedHomeFilter) return false;
       if (selectedCategoryFilter !== 'all' && r.category !== selectedCategoryFilter) return false;
       if (selectedTypeFilter !== 'all' && r.type !== selectedTypeFilter) return false;
+      if (taxDeductibleOnly && !r.isTaxDeductible) return false;
 
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -80,7 +65,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
       if (sortBy === 'cost-desc') return b.cost - a.cost;
       return 0;
     });
-  }, [records, selectedHomeFilter, selectedCategoryFilter, selectedTypeFilter, searchQuery, sortBy, homeMap]);
+  }, [records, selectedHomeFilter, selectedCategoryFilter, selectedTypeFilter, taxDeductibleOnly, searchQuery, sortBy, homeMap]);
 
   const totalFilteredCost = filteredRecords.reduce((sum, r) => sum + r.cost, 0);
 
@@ -102,10 +87,10 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
               <History className="w-5 h-5" />
             </div>
-            <h1 className="text-2xl font-black text-white font-display">Maintenance History Logs</h1>
+            <h1 className="text-2xl font-black text-white font-display">Home Expense & Maintenance Log</h1>
           </div>
           <p className="text-xs text-slate-400">
-            Comprehensive maintenance timeline, repair receipts, and expense tracking.
+            Comprehensive timeline of maintenance, repairs, and every home-related expense.
           </p>
         </div>
 
@@ -131,7 +116,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
           >
             <Plus className="w-4 h-4" />
-            Log Maintenance
+            Log Expense
           </button>
         </div>
       </div>
@@ -145,7 +130,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search category, provider, notes..."
+              placeholder="Search category, payee, notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -185,15 +170,14 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             className="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="all">🔧 All Types</option>
-            <option value="Maintenance">Maintenance</option>
-            <option value="Repair">Repair</option>
-            <option value="Upgrade">Upgrade</option>
-            <option value="Inspection">Inspection</option>
+            {TYPES.map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
           </select>
 
         </div>
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <select
             value={sortBy}
             onChange={(e: any) => setSortBy(e.target.value)}
@@ -203,11 +187,22 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             <option value="date-asc">📅 Oldest First</option>
             <option value="cost-desc">💲 Highest Cost</option>
           </select>
+
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={taxDeductibleOnly}
+              onChange={(e) => setTaxDeductibleOnly(e.target.checked)}
+              className="w-4 h-4 rounded text-emerald-500 bg-slate-900 border-slate-700 focus:ring-emerald-500"
+            />
+            <Landmark className="w-3.5 h-3.5 text-amber-400" />
+            Tax-Deductible Only
+          </label>
         </div>
 
         {/* Filter Summary & Total Bar */}
         <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800">
-          <span>Showing <strong className="text-emerald-400">{filteredRecords.length}</strong> maintenance records</span>
+          <span>Showing <strong className="text-emerald-400">{filteredRecords.length}</strong> log entries</span>
           <span>Total Expenses: <strong className="text-white font-mono text-sm">${totalFilteredCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
         </div>
       </div>
@@ -236,10 +231,17 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                         record.type === 'Repair' ? 'bg-red-950 text-red-400 border border-red-800' :
                         record.type === 'Maintenance' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
                         record.type === 'Upgrade' ? 'bg-purple-950 text-purple-400 border border-purple-800' :
+                        record.type === 'Expense' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
                         'bg-slate-800 text-slate-300'
                       }`}>
                         {record.type}
                       </span>
+                      {record.isTaxDeductible && (
+                        <span className="flex items-center gap-1 text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md bg-amber-950 text-amber-400 border border-amber-800">
+                          <Landmark className="w-3 h-3" />
+                          Tax Deductible
+                        </span>
+                      )}
                     </div>
 
                     {home && (
@@ -316,15 +318,15 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
       ) : (
         <div className="text-center py-16 glass-panel rounded-3xl">
           <History className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-white mb-1">No Maintenance Logs Found</h3>
+          <h3 className="text-base font-bold text-white mb-1">No Log Entries Found</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
-            No maintenance records match your current search or filter criteria.
+            No log entries match your current search or filter criteria.
           </p>
           <button
             onClick={onOpenAddService}
             className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition-all"
           >
-            + Add New Maintenance Record
+            + Add New Log Entry
           </button>
         </div>
       )}

@@ -238,7 +238,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
           >
             <PlusCircle className="w-4 h-4" />
-            Log Maintenance
+            Log Expense
           </button>
 
           <button
@@ -271,8 +271,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       <div className="glass-panel p-6 rounded-2xl">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-white">Recent Maintenance & Repair Logs</h2>
-            <p className="text-xs text-slate-400">Latest maintenance activities for {activeHome.nickname}</p>
+            <h2 className="text-lg font-bold text-white">Recent Expense & Maintenance Logs</h2>
+            <p className="text-xs text-slate-400">Latest logged activity for {activeHome.nickname}</p>
           </div>
           <button
             onClick={() => onSelectTab('history')}
@@ -284,13 +284,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         {recentRecords.length === 0 ? (
           <div className="text-center py-10 text-slate-400 text-sm">
-            No maintenance records logged yet for this home.
+            No log entries yet for this home.
             <div className="mt-3">
               <button
                 onClick={onOpenAddService}
                 className="text-emerald-400 underline font-semibold text-xs"
               >
-                Log your first service now
+                Log your first expense now
               </button>
             </div>
           </div>
@@ -309,6 +309,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         record.type === 'Repair' ? 'bg-red-950 text-red-400 border border-red-800/60' :
                         record.type === 'Maintenance' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' :
                         record.type === 'Upgrade' ? 'bg-purple-950 text-purple-400 border border-purple-800/60' :
+                        record.type === 'Expense' ? 'bg-amber-950 text-amber-400 border border-amber-800/60' :
                         'bg-slate-800 text-slate-300'
                       }`}>
                         {record.type}

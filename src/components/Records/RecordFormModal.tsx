@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Wrench, BellPlus } from 'lucide-react';
+import { X, Save, Wrench, BellPlus, Landmark } from 'lucide-react';
 import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType } from '../../types';
+import { CATEGORIES, TYPES } from '../../constants/categories';
 
 interface RecordFormModalProps {
   isOpen: boolean;
@@ -10,27 +11,6 @@ interface RecordFormModalProps {
   activeHomeId: string;
   initialRecord?: EnrichedHomeRecord | null;
 }
-
-const CATEGORIES: MaintenanceCategory[] = [
-  'HVAC',
-  'Plumbing',
-  'Electrical',
-  'Roofing',
-  'Appliances',
-  'Landscaping & Lawn',
-  'Pest Control',
-  'Painting',
-  'Flooring',
-  'Windows & Doors',
-  'Foundation & Structural',
-  'Renovation',
-  'Inspection',
-  'Utilities',
-  'General Repair',
-  'Other'
-];
-
-const TYPES: MaintenanceType[] = ['Maintenance', 'Repair', 'Upgrade', 'Inspection'];
 
 const PAYMENT_TYPES: PaymentType[] = ['Cash', 'Credit Card', 'Debit Card', 'Bank Transfer', 'Check', 'Other'];
 
@@ -51,6 +31,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   const [provider, setProvider] = useState('');
   const [notes, setNotes] = useState('');
   const [paymentType, setPaymentType] = useState<PaymentType>('Cash');
+  const [isTaxDeductible, setIsTaxDeductible] = useState(false);
 
   // Optional Reminder
   const [addNextReminder, setAddNextReminder] = useState(false);
@@ -67,6 +48,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       setProvider(initialRecord.provider || '');
       setNotes(initialRecord.notes || '');
       setPaymentType(initialRecord.paymentType || 'Cash');
+      setIsTaxDeductible(Boolean(initialRecord.isTaxDeductible));
       setNextServiceDate(initialRecord.nextServiceDate || '');
       setAddNextReminder(Boolean(initialRecord.nextServiceDate));
     } else {
@@ -79,12 +61,20 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       setProvider('');
       setNotes('');
       setPaymentType('Cash');
+      setIsTaxDeductible(false);
       setNextServiceDate('');
       setAddNextReminder(false);
     }
   }, [initialRecord, isOpen, activeHomeId, homes]);
 
   if (!isOpen) return null;
+
+  const handleCategoryChange = (newCategory: MaintenanceCategory) => {
+    setCategory(newCategory);
+    if (newCategory === 'Property Tax') {
+      setIsTaxDeductible(true);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +91,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       provider: provider.trim() || 'Self / DIY',
       notes: notes.trim() || undefined,
       paymentType,
+      isTaxDeductible,
       nextServiceDate: addNextReminder && nextServiceDate ? nextServiceDate : undefined,
     };
 
@@ -119,7 +110,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
               <Wrench className="w-5 h-5" />
             </div>
             <h2 className="text-lg font-bold text-white">
-              {initialRecord ? 'Edit Maintenance Record' : 'Log New Maintenance / Repair'}
+              {initialRecord ? 'Edit Log Entry' : 'Log New Home Expense'}
             </h2>
           </div>
           <button
@@ -191,7 +182,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
               <label className="block text-xs font-semibold text-slate-300 mb-1">Category *</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value as MaintenanceCategory)}
+                onChange={(e) => handleCategoryChange(e.target.value as MaintenanceCategory)}
                 className="w-full glass-input text-white text-sm rounded-xl p-2.5 bg-slate-900"
               >
                 {CATEGORIES.map((cat) => (
@@ -231,7 +222,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             <label className="block text-xs font-semibold text-slate-300 mb-1">Service Provider / Contractor Name</label>
             <input
               type="text"
-              placeholder="e.g. Springfield HVAC Services, ABC Plumbing, DIY"
+              placeholder="e.g. Springfield HVAC Services, County Tax Assessor, State Farm Insurance, DIY"
               value={provider}
               onChange={(e) => setProvider(e.target.value)}
               className="w-full glass-input text-white text-sm rounded-xl p-2.5"
@@ -242,11 +233,27 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             <label className="block text-xs font-semibold text-slate-300 mb-1">Notes, Parts Used & Specifications</label>
             <textarea
               rows={3}
-              placeholder="Filter model, warranty info, materials used..."
+              placeholder="Filter model, warranty info, materials used, policy number..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full glass-input text-white text-sm rounded-xl p-2.5 resize-none"
             />
+          </div>
+
+          {/* Tax Deductible Toggle */}
+          <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isTaxDeductible}
+                onChange={(e) => setIsTaxDeductible(e.target.checked)}
+                className="w-4 h-4 rounded text-emerald-500 bg-slate-900 border-slate-700 focus:ring-emerald-500"
+              />
+              <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <Landmark className="w-4 h-4 text-amber-400" />
+                Tax Deductible Expense
+              </span>
+            </label>
           </div>
 
           {/* Toggle Next Service Reminder */}
@@ -293,7 +300,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
               className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20"
             >
               <Save className="w-4 h-4" />
-              Save Maintenance Log
+              Save Log Entry
             </button>
           </div>
 

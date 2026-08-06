@@ -13,39 +13,14 @@ import {
   Legend
 } from 'recharts';
 import type { Home, EnrichedHomeRecord } from '../../types';
-import { BarChart3, PieChart as PieIcon, DollarSign, TrendingUp } from 'lucide-react';
+import { BarChart3, PieChart as PieIcon, DollarSign, TrendingUp, Landmark } from 'lucide-react';
+import { CATEGORY_COLORS, TYPE_COLORS } from '../../constants/categories';
 
 interface CostAnalyticsProps {
   homes: Home[];
   activeHomeId: string;
   records: EnrichedHomeRecord[];
 }
-
-const CATEGORY_COLORS: Record<string, string> = {
-  'HVAC': '#0284c7',
-  'Plumbing': '#ef4444',
-  'Electrical': '#f59e0b',
-  'Roofing': '#8b5cf6',
-  'Appliances': '#10b981',
-  'Landscaping & Lawn': '#84cc16',
-  'Pest Control': '#ec4899',
-  'Painting': '#06b6d4',
-  'Flooring': '#6366f1',
-  'Windows & Doors': '#f97316',
-  'Foundation & Structural': '#64748b',
-  'Renovation': '#14b8a6',
-  'Inspection': '#a3e635',
-  'Utilities': '#38bdf8',
-  'General Repair': '#f97316',
-  'Other': '#94a3b8'
-};
-
-const TYPE_COLORS: Record<string, string> = {
-  'Maintenance': '#34d399',
-  'Repair': '#f87171',
-  'Upgrade': '#c084fc',
-  'Inspection': '#a3e635'
-};
 
 export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
   homes,
@@ -101,6 +76,9 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
   }, [filteredRecords]);
 
   const totalSpent = filteredRecords.reduce((sum, r) => sum + r.cost, 0);
+  const totalTaxDeductible = filteredRecords
+    .filter(r => r.isTaxDeductible)
+    .reduce((sum, r) => sum + r.cost, 0);
 
   return (
     <div className="space-y-6">
@@ -116,11 +94,22 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
             Expense trends and category breakdown for {activeHome ? activeHome.nickname : 'All Homes'}
           </p>
         </div>
-        <div className="bg-slate-900 border border-slate-750 px-4 py-2 rounded-xl text-right">
-          <span className="text-xs text-slate-400 block font-medium">Total Filtered Spending</span>
-          <span className="text-xl font-extrabold text-white font-mono">
-            ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
+        <div className="flex flex-wrap gap-3">
+          <div className="bg-slate-900 border border-slate-750 px-4 py-2 rounded-xl text-right">
+            <span className="text-xs text-slate-400 block font-medium">Total Filtered Spending</span>
+            <span className="text-xl font-extrabold text-white font-mono">
+              ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          </div>
+          <div className="bg-slate-900 border border-amber-800/60 px-4 py-2 rounded-xl text-right">
+            <span className="text-xs text-amber-400 block font-medium flex items-center justify-end gap-1">
+              <Landmark className="w-3 h-3" />
+              Tax-Deductible Total
+            </span>
+            <span className="text-xl font-extrabold text-white font-mono">
+              ${totalTaxDeductible.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          </div>
         </div>
       </div>
 

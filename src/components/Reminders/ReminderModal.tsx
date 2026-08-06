@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Bell } from 'lucide-react';
 import type { Home, HomeReminder, MaintenanceCategory } from '../../types';
+import { CATEGORIES } from '../../constants/categories';
 
 interface ReminderModalProps {
   isOpen: boolean;
@@ -10,25 +11,6 @@ interface ReminderModalProps {
   activeHomeId: string;
   initialReminder?: HomeReminder | null;
 }
-
-const CATEGORIES: MaintenanceCategory[] = [
-  'HVAC',
-  'Plumbing',
-  'Electrical',
-  'Roofing',
-  'Appliances',
-  'Landscaping & Lawn',
-  'Pest Control',
-  'Painting',
-  'Flooring',
-  'Windows & Doors',
-  'Foundation & Structural',
-  'Renovation',
-  'Inspection',
-  'Utilities',
-  'General Repair',
-  'Other'
-];
 
 export const ReminderModal: React.FC<ReminderModalProps> = ({
   isOpen,

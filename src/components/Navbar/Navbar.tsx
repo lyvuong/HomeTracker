@@ -110,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold text-xs sm:text-sm px-3.5 py-2 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
             >
               <PlusCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Log Maintenance</span>
+              <span className="hidden sm:inline">Log Expense</span>
             </button>
 
             {/* About Page Button */}
