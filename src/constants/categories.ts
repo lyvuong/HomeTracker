@@ -1,4 +1,4 @@
-import type { MaintenanceCategory, MaintenanceType } from '../types';
+import type { MaintenanceCategory, MaintenanceSubcategory, MaintenanceType } from '../types';
 
 export const CATEGORIES: MaintenanceCategory[] = [
   'HVAC',
@@ -23,6 +23,30 @@ export const CATEGORIES: MaintenanceCategory[] = [
   'Home Warranty',
   'Other'
 ];
+
+/**
+ * Optional second level, per category. Only Utilities has one today: a
+ * utility bill is a recurring cost where "which utility" is the thing you
+ * actually want to slice by, unlike a one-off roof repair. Picking one is
+ * never required, so "Home - Utilities - Main House" stays valid and every
+ * record written before this keeps working.
+ */
+export const SUBCATEGORIES: Partial<Record<MaintenanceCategory, MaintenanceSubcategory[]>> = {
+  'Utilities': [
+    'Electricity',
+    'Water',
+    'Natural Gas',
+    'Sewer',
+    'Trash & Recycling',
+    'Internet',
+    'Phone & Mobile',
+    'Propane & Heating Oil',
+    'Solar'
+  ]
+};
+
+export const getSubcategories = (category: MaintenanceCategory): MaintenanceSubcategory[] =>
+  SUBCATEGORIES[category] || [];
 
 export const TYPES: MaintenanceType[] = ['Maintenance', 'Repair', 'Upgrade', 'Inspection', 'Expense'];
 

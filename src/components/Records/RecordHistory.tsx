@@ -9,9 +9,9 @@ import {
   Trash2,
   Landmark
 } from 'lucide-react';
-import type { Home, EnrichedHomeRecord } from '../../types';
+import type { Home, EnrichedHomeRecord, MaintenanceCategory } from '../../types';
 import { exportRecordsAsCSV } from '../../services/storage';
-import { CATEGORIES, TYPES } from '../../constants/categories';
+import { CATEGORIES, TYPES, getSubcategories } from '../../constants/categories';
 
 interface RecordHistoryProps {
   records: EnrichedHomeRecord[];
@@ -32,6 +32,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
 }) => {
   const [selectedHomeFilter, setSelectedHomeFilter] = useState<string>(activeHomeId || 'all');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
+  const [selectedSubcategoryFilter, setSelectedSubcategoryFilter] = useState<string>('all');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('all');
   const [taxDeductibleOnly, setTaxDeductibleOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -41,10 +42,23 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
     return new Map(homes.map(h => [h.id, h]));
   }, [homes]);
 
+  // Subcategories are per-category, so this only appears once a category
+  // that defines them is selected.
+  const availableSubcategories = useMemo(
+    () => (selectedCategoryFilter === 'all' ? [] : getSubcategories(selectedCategoryFilter as MaintenanceCategory)),
+    [selectedCategoryFilter]
+  );
+
+  const handleCategoryFilterChange = (value: string) => {
+    setSelectedCategoryFilter(value);
+    setSelectedSubcategoryFilter('all');
+  };
+
   const filteredRecords = useMemo(() => {
     return records.filter(r => {
       if (selectedHomeFilter !== 'all' && r.homeId !== selectedHomeFilter) return false;
       if (selectedCategoryFilter !== 'all' && r.category !== selectedCategoryFilter) return false;
+      if (selectedSubcategoryFilter !== 'all' && r.subcategory !== selectedSubcategoryFilter) return false;
       if (selectedTypeFilter !== 'all' && r.type !== selectedTypeFilter) return false;
       if (taxDeductibleOnly && !r.isTaxDeductible) return false;
 
@@ -53,9 +67,10 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
         const home = homeMap.get(r.homeId);
         const homeName = home ? home.nickname.toLowerCase() : '';
         const matchCategory = r.category.toLowerCase().includes(query);
+        const matchSubcategory = (r.subcategory || '').toLowerCase().includes(query);
         const matchProvider = (r.provider || '').toLowerCase().includes(query);
         const matchNotes = (r.notes || '').toLowerCase().includes(query);
-        return matchCategory || matchProvider || matchNotes || homeName.includes(query);
+        return matchCategory || matchSubcategory || matchProvider || matchNotes || homeName.includes(query);
       }
 
       return true;
@@ -65,7 +80,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
       if (sortBy === 'cost-desc') return b.cost - a.cost;
       return 0;
     });
-  }, [records, selectedHomeFilter, selectedCategoryFilter, selectedTypeFilter, taxDeductibleOnly, searchQuery, sortBy, homeMap]);
+  }, [records, selectedHomeFilter, selectedCategoryFilter, selectedSubcategoryFilter, selectedTypeFilter, taxDeductibleOnly, searchQuery, sortBy, homeMap]);
 
   const totalFilteredCost = filteredRecords.reduce((sum, r) => sum + r.cost, 0);
 
@@ -154,7 +169,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           {/* Filter Category */}
           <select
             value={selectedCategoryFilter}
-            onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+            onChange={(e) => handleCategoryFilterChange(e.target.value)}
             className="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="all">📋 All Categories</option>
@@ -162,6 +177,20 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
+
+          {/* Filter Subcategory */}
+          {availableSubcategories.length > 0 && (
+            <select
+              value={selectedSubcategoryFilter}
+              onChange={(e) => setSelectedSubcategoryFilter(e.target.value)}
+              className="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            >
+              <option value="all">💡 All {selectedCategoryFilter}</option>
+              {availableSubcategories.map(sub => (
+                <option key={sub} value={sub}>{sub}</option>
+              ))}
+            </select>
+          )}
 
           {/* Filter Type */}
           <select
@@ -226,7 +255,12 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
 
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-bold text-base text-white">{record.category}</h3>
+                      <h3 className="font-bold text-base text-white">
+                        {record.category}
+                        {record.subcategory && (
+                          <span className="text-slate-400 font-semibold"> · {record.subcategory}</span>
+                        )}
+                      </h3>
                       <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md ${
                         record.type === 'Repair' ? 'bg-red-950 text-red-400 border border-red-800' :
                         record.type === 'Maintenance' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :

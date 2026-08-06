@@ -39,6 +39,14 @@ export const INITIAL_RECORDS: HomeRecord[] = [
     category: 'Plumbing',
     type: 'Repair',
     createdAt: new Date().toISOString()
+  },
+  {
+    id: 'rec-3',
+    homeId: 'demo-h1',
+    category: 'Utilities',
+    subcategory: 'Electricity',
+    type: 'Expense',
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -64,6 +72,17 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
     notes: 'Fixed leaking pipe under kitchen sink.',
     category: 'Home - Plumbing - Main House',
     paymentType: 'Debit Card',
+    user: 'Home Owner'
+  },
+  {
+    id: 'rec-3',
+    date: '2026-07-05',
+    time: '08:00',
+    amount: 142.37,
+    vendor: 'City Power & Light',
+    notes: 'June electricity bill.',
+    category: 'Home - Utilities - Electricity - Main House',
+    paymentType: 'Bank Transfer',
     user: 'Home Owner'
   }
 ];
@@ -246,12 +265,13 @@ export const setStoredFamilyCode = (code: string): void => {
 
 export const exportRecordsAsCSV = (records: EnrichedHomeRecord[], homes: Home[]): void => {
   const homeMap = new Map(homes.map(h => [h.id, h.nickname]));
-  const headers = ['Home', 'Date', 'Time', 'Category', 'Type', 'Cost ($)', 'Payment Type', 'Provider', 'Notes', 'Tax Deductible'];
+  const headers = ['Home', 'Date', 'Time', 'Category', 'Subcategory', 'Type', 'Cost ($)', 'Payment Type', 'Provider', 'Notes', 'Tax Deductible'];
   const rows = records.map(r => [
     `"${homeMap.get(r.homeId) || 'Unknown Home'}"`,
     `"${r.date}"`,
     `"${r.time}"`,
     `"${r.category}"`,
+    `"${r.subcategory || ''}"`,
     `"${r.type}"`,
     r.cost.toFixed(2),
     `"${r.paymentType}"`,

@@ -304,7 +304,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-slate-100">{record.category}</span>
+                      <span className="font-bold text-sm text-slate-100">
+                        {record.category}
+                        {record.subcategory && (
+                          <span className="text-slate-400 font-semibold"> · {record.subcategory}</span>
+                        )}
+                      </span>
                       <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-md ${
                         record.type === 'Repair' ? 'bg-red-950 text-red-400 border border-red-800/60' :
                         record.type === 'Maintenance' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60' :

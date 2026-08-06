@@ -464,11 +464,13 @@ export const App: React.FC = () => {
     } : undefined;
 
     const category = recordData.category || 'General Repair';
+    const subcategory = recordData.subcategory || undefined;
 
     const newRecord: HomeRecord = {
       id: recordId,
       homeId: activeHomeId,
       category,
+      subcategory,
       type: recordData.type || 'Maintenance',
       nextServiceDate: recordData.nextServiceDate || undefined,
       createdAt: isEdit ? editingRecord.createdAt : timestamp,
@@ -483,7 +485,7 @@ export const App: React.FC = () => {
       amount: Number(recordData.cost) || 0,
       vendor: recordData.provider || 'DIY',
       notes: recordData.notes || '',
-      category: buildTransactionCategory(category, home),
+      category: buildTransactionCategory(category, home, subcategory),
       paymentType: recordData.paymentType || 'Cash',
       user: auditInfo?.displayName || 'Home Owner',
       isTaxDeductible: recordData.isTaxDeductible ?? false

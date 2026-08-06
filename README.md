@@ -15,6 +15,7 @@ HomeTracker is a **companion app to [CarTracker](../CarTracker)** — it intenti
 
 - 🏠 **Home Portfolio Management**: Keep detailed profiles for every property — nickname, address, property type, year built, square footage, purchase date, and notes.
 - 📋 **Comprehensive Home Expense & Maintenance Logs**: Record maintenance, repairs, and homeownership expenses — HVAC, Plumbing, Electrical, Roofing, Appliances, Landscaping, Property Tax, Mortgage, Homeowners Insurance, HOA Fees, Home Warranty, and more — with dates, itemized costs, payment types, providers/contractors, and notes.
+- 💡 **Utility Subcategories**: Utilities entries can name the specific bill — Electricity, Water, Natural Gas, Sewer, Trash & Recycling, Internet, Phone & Mobile, Propane & Heating Oil, or Solar — so recurring bills can be filtered and compared individually. Optional, and available on any category that defines subcategories.
 - 🧾 **Tax Deductible Tracking**: Flag any log entry (e.g. Property Tax payments) as a tax-deductible expense; the flag auto-enables when the Property Tax category is selected.
 - ⏰ **Smart Maintenance Reminders**: Date-based and repeat-interval reminders so seasonal tasks (gutter cleaning, filter changes) never slip through the cracks.
 - 📊 **Interactive Financial Analytics**: Cost summaries per home, total lifetime expenses, and monthly cost breakdowns by category and type.
@@ -110,7 +111,7 @@ Or connect the repo via **Workers & Pages > Create > Pages > Connect to Git** wi
 
 Every maintenance log is split across two linked Firestore documents that share the same ID, mirroring CarTracker's pattern:
 
-- **`homeRecords/{id}`** — HomeTracker-specific fields: `homeId`, `category`, `type`, `nextServiceDate`, plus audit metadata.
+- **`homeRecords/{id}`** — HomeTracker-specific fields: `homeId`, `category`, `subcategory`, `type`, `nextServiceDate`, plus audit metadata.
 - **`transactions/{id}`** — the exact same generic ledger collection CarTracker writes to (`users/{uid}/transactions` or `households/{code}/transactions`):
 
   | Field | Type | Notes |
@@ -120,7 +121,7 @@ Every maintenance log is split across two linked Firestore documents that share 
   | `amount` | `number` | Cost |
   | `vendor` | `string` | Contractor / service provider name |
   | `notes` | `string?` | Free text |
-  | `category` | `string` | Free-form; HomeTracker auto-fills `"Home - {MaintenanceCategory} - {home.nickname}"` |
+  | `category` | `string` | Free-form; HomeTracker auto-fills `"Home - {MaintenanceCategory} - {home.nickname}"`, inserting the subcategory when there is one: `"Home - Utilities - Electricity - Main House"` |
   | `paymentType` | `'Cash' \| 'Credit Card' \| 'Debit Card' \| 'Bank Transfer' \| 'Check' \| 'Other'` | |
   | `user` | `string` | Display name of whoever logged it |
   | `isTaxDeductible` | `boolean?` | Marks the expense as tax-deductible (auto-set for Property Tax) |

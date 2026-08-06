@@ -53,6 +53,14 @@ export type MaintenanceCategory =
   | 'Home Warranty'
   | 'Other';
 
+/**
+ * Optional second level under a category — currently only Utilities has one,
+ * so a recurring bill can say which utility it was. Written into the shared
+ * ledger by concatenating it onto the category string with a hyphen the way
+ * CarTracker appends the vehicle: "Home - Utilities - Electricity - Main House".
+ */
+export type MaintenanceSubcategory = string;
+
 export type MaintenanceType = 'Maintenance' | 'Repair' | 'Upgrade' | 'Inspection' | 'Expense';
 
 export type PaymentType = 'Cash' | 'Credit Card' | 'Debit Card' | 'Bank Transfer' | 'Check' | 'Other';
@@ -79,6 +87,7 @@ export interface HomeRecord {
   id: string;
   homeId: string;
   category: MaintenanceCategory;
+  subcategory?: MaintenanceSubcategory; // omitted when the category offers none
   type: MaintenanceType;
   nextServiceDate?: string;
   createdAt: string;

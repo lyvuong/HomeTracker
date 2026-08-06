@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Wrench, BellPlus, Landmark } from 'lucide-react';
 import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType } from '../../types';
-import { CATEGORIES, TYPES } from '../../constants/categories';
+import { CATEGORIES, TYPES, getSubcategories } from '../../constants/categories';
 
 interface RecordFormModalProps {
   isOpen: boolean;
@@ -27,6 +27,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
   const [cost, setCost] = useState<number | ''>('');
   const [category, setCategory] = useState<MaintenanceCategory>('HVAC');
+  const [subcategory, setSubcategory] = useState('');
   const [type, setType] = useState<MaintenanceType>('Maintenance');
   const [provider, setProvider] = useState('');
   const [notes, setNotes] = useState('');
@@ -44,6 +45,13 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       setTime(initialRecord.time || new Date().toTimeString().slice(0, 5));
       setCost(initialRecord.cost);
       setCategory(initialRecord.category);
+      // Drop a subcategory the category no longer offers rather than
+      // silently re-saving it.
+      setSubcategory(
+        getSubcategories(initialRecord.category).includes(initialRecord.subcategory || '')
+          ? initialRecord.subcategory || ''
+          : ''
+      );
       setType(initialRecord.type);
       setProvider(initialRecord.provider || '');
       setNotes(initialRecord.notes || '');
@@ -57,6 +65,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       setTime(new Date().toTimeString().slice(0, 5));
       setCost('');
       setCategory('HVAC');
+      setSubcategory('');
       setType('Maintenance');
       setProvider('');
       setNotes('');
@@ -69,8 +78,11 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
 
   if (!isOpen) return null;
 
+  const subcategories = getSubcategories(category);
+
   const handleCategoryChange = (newCategory: MaintenanceCategory) => {
     setCategory(newCategory);
+    setSubcategory('');
     setIsTaxDeductible(newCategory === 'Property Tax');
   };
 
@@ -85,6 +97,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       time,
       cost: Number(cost),
       category,
+      subcategory: subcategory || undefined,
       type,
       provider: provider.trim() || 'Self / DIY',
       notes: notes.trim() || undefined,
@@ -215,6 +228,25 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
               </select>
             </div>
           </div>
+
+          {/* Subcategory — only categories that define one (Utilities today) */}
+          {subcategories.length > 0 && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                {category} Subcategory <span className="font-normal text-slate-500">(optional)</span>
+              </label>
+              <select
+                value={subcategory}
+                onChange={(e) => setSubcategory(e.target.value)}
+                className="w-full glass-input text-white text-sm rounded-xl p-2.5 bg-slate-900"
+              >
+                <option value="">— None —</option>
+                {subcategories.map((sub) => (
+                  <option key={sub} value={sub}>{sub}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">Service Provider / Contractor Name</label>
