@@ -565,6 +565,35 @@ export const App: React.FC = () => {
     }
   };
 
+  // Detaches a record from its home, keeping only the underlying Transaction
+  // (the shared, app-agnostic ledger entry) intact — used when a logged item
+  // turns out not to be a home expense at all. Only the HomeRecord is
+  // removed; the Transaction document is left alone so it still shows up
+  // wherever the generic transactions collection is consumed. Its category
+  // is reset to the "Expense - Other" namespace (rather than left as
+  // "Home - ...") so the shared Expense app recognizes it as its own
+  // editable row instead of a foreign, read-only Home entry.
+  const handleMoveRecordToExpense = (record: EnrichedHomeRecord) => {
+    if (!confirm('Move this log out of the home history and keep it only as a general expense? It will no longer appear on this home.')) return;
+    setRecords(prev => prev.filter(r => r.id !== record.id));
+    setIsServiceModalOpen(false);
+    setEditingRecord(null);
+
+    const transaction = transactions.find(t => t.id === record.id);
+    if (transaction && transaction.category !== 'Expense - Other') {
+      const updatedTransaction: Transaction = { ...transaction, category: 'Expense - Other' };
+      setTransactions(prev => prev.map(t => (t.id === record.id ? updatedTransaction : t)));
+      if (user && isFirebaseActive) {
+        saveFirestoreTransaction(user.uid, updatedTransaction, familyCode);
+      }
+    }
+
+    if (user && isFirebaseActive) {
+      deleteFirestoreRecord(user.uid, record.id, familyCode);
+      deleteRTDBRecord(user.uid, record.id, familyCode);
+    }
+  };
+
   // Handlers for Maintenance Reminders
   const handleSaveReminder = (reminderData: HomeReminder) => {
     const isEdit = reminders.some(rem => rem.id === reminderData.id);
@@ -809,6 +838,7 @@ export const App: React.FC = () => {
         initialRecord={editingRecord}
         paymentTypes={paymentTypes}
         onManagePaymentTypes={() => setIsPaymentTypesModalOpen(true)}
+        onMoveToExpense={handleMoveRecordToExpense}
       />
 
       <HouseModal

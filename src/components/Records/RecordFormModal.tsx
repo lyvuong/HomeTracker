@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, Save, Wrench, BellPlus, Landmark, Settings2, Home as HomeIcon, Calendar, Clock, DollarSign, Tag, User, FileText } from 'lucide-react';
+import { X, Save, Wrench, BellPlus, Landmark, Settings2, Home as HomeIcon, Calendar, Clock, DollarSign, Tag, User, FileText, Link2Off } from 'lucide-react';
 import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType, PaymentTypeItem } from '../../types';
 import { CATEGORIES, TYPES, getSubcategories } from '../../constants/categories';
 
@@ -12,6 +12,7 @@ interface RecordFormModalProps {
   initialRecord?: EnrichedHomeRecord | null;
   paymentTypes?: PaymentTypeItem[];
   onManagePaymentTypes?: () => void;
+  onMoveToExpense?: (record: EnrichedHomeRecord) => void;
 }
 
 export const RecordFormModal: React.FC<RecordFormModalProps> = ({
@@ -22,7 +23,8 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   activeHomeId,
   initialRecord,
   paymentTypes = [],
-  onManagePaymentTypes
+  onManagePaymentTypes,
+  onMoveToExpense
 }) => {
   const availablePaymentTypes = useMemo(() => {
     const rawNames = (paymentTypes && paymentTypes.length > 0)
@@ -188,10 +190,22 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             {/* Row 1: Target Home (7 cols) + Cost ($ USD) (5 cols) */}
             <div className="grid grid-cols-12 gap-2">
               <div className="col-span-7">
-                <label className="block text-[11px] font-semibold text-slate-300 mb-1 flex items-center gap-1">
-                  <HomeIcon className="w-3 h-3 text-emerald-400" />
-                  Target Home *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-semibold text-slate-300 flex items-center gap-1">
+                    <HomeIcon className="w-3 h-3 text-emerald-400" />
+                    Target Home *
+                  </label>
+                  {initialRecord && onMoveToExpense && (
+                    <button
+                      type="button"
+                      onClick={() => onMoveToExpense(initialRecord)}
+                      className="text-[10px] font-semibold text-purple-400 hover:text-purple-300 flex items-center gap-0.5"
+                      title="Remove this log from the home and keep it only as a general expense"
+                    >
+                      <Link2Off className="w-3 h-3" /> Move to Expense
+                    </button>
+                  )}
+                </div>
                 <select
                   value={homeId}
                   onChange={(e) => setHomeId(e.target.value)}
