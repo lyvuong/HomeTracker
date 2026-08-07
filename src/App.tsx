@@ -483,7 +483,11 @@ export const App: React.FC = () => {
   // Handlers for Maintenance Records
   const handleSaveRecord = (recordData: Partial<EnrichedHomeRecord>) => {
     if (!activeHomeId) return;
-    const home = homes.find(h => h.id === activeHomeId);
+    // The form's "Target Home" selector lets a record be (re)assigned to any
+    // home, not just the one currently active in the app — always defer to
+    // it when present so editing a record's home actually moves it.
+    const targetHomeId = recordData.homeId || activeHomeId;
+    const home = homes.find(h => h.id === targetHomeId);
     if (!home) return;
 
     const isEdit = !!editingRecord;
@@ -501,7 +505,7 @@ export const App: React.FC = () => {
 
     const newRecord: HomeRecord = {
       id: recordId,
-      homeId: activeHomeId,
+      homeId: targetHomeId,
       category,
       subcategory,
       type: recordData.type || 'Maintenance',
