@@ -29,25 +29,65 @@ html.light .glass-card {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Ensure headings & primary numbers inside glass cards in Light Mode are crisp dark slate */
-html.light .glass-card h1,
-html.light .glass-card h2,
-html.light .glass-card h3,
-html.light .glass-card h4,
-html.light .glass-card .text-2xl,
-html.light .glass-card .text-3xl,
-html.light .glass-card .text-xl,
-html.light .glass-card .text-lg,
-html.light .glass-panel h1,
-html.light .glass-panel h2,
-html.light .glass-panel h3,
-html.light .glass-panel h4 {
+/* Ensure headings & text inside glass cards in Light Mode are crisp dark slate */
+html.light :is(.glass-card, .glass-panel) h1,
+html.light :is(.glass-card, .glass-panel) h2,
+html.light :is(.glass-card, .glass-panel) h3,
+html.light :is(.glass-card, .glass-panel) h4,
+html.light :is(.glass-card, .glass-panel) .text-white,
+html.light :is(.glass-card, .glass-panel) .text-slate-100,
+html.light :is(.glass-card, .glass-panel) .text-slate-200 {
   color: #0f172a !important;
 }
 
-html.light .glass-card .text-slate-400,
-html.light .glass-panel .text-slate-400 {
+html.light :is(.glass-card, .glass-panel) .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light :is(.glass-card, .glass-panel) .text-slate-400,
+html.light :is(.glass-card, .glass-panel) .text-slate-500 {
   color: #475569 !important;
+}
+
+/* Elements that keep an explicit static dark chip background (e.g. bg-slate-800/900/950)
+   inside a light-mode glass card are an intentional dark chip, not the card surface
+   itself — their own light-on-dark text must be preserved, not forced dark-on-dark.
+   Matched as a standalone class token (start-of-string or preceded by a space) so a
+   hover/focus-only variant like "hover:bg-slate-800/30" — which is NOT the resting
+   background — never falsely counts as a static dark chip. */
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-white,
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-white {
+  color: #ffffff !important;
+}
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-100,
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-100 {
+  color: #f1f5f9 !important;
+}
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-200,
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-200 {
+  color: #e2e8f0 !important;
+}
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-300,
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-300 {
+  color: #cbd5e1 !important;
+}
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-400,
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-400 {
+  color: #94a3b8 !important;
+}
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-500,
+html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-500 {
+  color: #64748b !important;
+}
+
+.glass-input {
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid #334155;
+}
+
+.glass-input::placeholder {
+  color: #94a3b8;
 }
 
 html.light .glass-input {
@@ -71,6 +111,19 @@ html.light textarea {
 html.light input::placeholder,
 html.light textarea::placeholder {
   color: #64748b !important;
+}
+
+/* Inputs/selects/textareas that keep an explicit static dark chip background
+   (e.g. bg-slate-800/900) and are NOT already theme-adaptive via .glass-input —
+   their typed text and placeholder must stay light-on-dark, not get forced
+   dark-on-dark by the rules above. .glass-input fields are excluded here since
+   they intentionally switch to a light background + dark text in light mode. */
+html.light :is(input, select, textarea):not(.glass-input):is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) {
+  color: #ffffff !important;
+}
+
+html.light :is(input, textarea):not(.glass-input):is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"])::placeholder {
+  color: #94a3b8 !important;
 }
 
 /* Custom Scrollbar */

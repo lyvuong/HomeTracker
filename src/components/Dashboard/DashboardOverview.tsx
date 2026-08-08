@@ -69,7 +69,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     <div className="space-y-6">
 
       {/* Active Home Hero Card - Mobile-Optimized & Spacious */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-850 to-emerald-950 p-5 sm:p-7 shadow-xl border border-slate-800 text-white">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-5 sm:p-7 shadow-xl border border-slate-800 text-white">
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-6">
@@ -332,7 +332,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 <div className="flex items-center justify-between sm:justify-end gap-4">
                   <span className="text-xs text-slate-400 font-mono">{record.date}</span>
-                  <span className="text-base font-extrabold text-white font-mono bg-slate-850 px-2.5 py-1 rounded-lg border border-slate-700">
+                  <span className="text-base font-extrabold text-white font-mono bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">
                     ${record.cost.toFixed(2)}
                   </span>
                 </div>

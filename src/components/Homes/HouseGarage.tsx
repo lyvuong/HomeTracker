@@ -184,7 +184,7 @@ export const HouseGarage: React.FC<HouseGarageProps> = ({
 
                   {/* Stats */}
                   <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-                    <span className="text-slate-400 flex items-center gap-1">
+                    <span className="text-slate-300 flex items-center gap-1">
                       <Ruler className="w-3.5 h-3.5 text-emerald-400" />
                       Square Footage:
                     </span>

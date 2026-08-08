@@ -210,7 +210,7 @@ export const AboutPage: React.FC<AboutPageProps> = () => {
                   {tech.category}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">{tech.desc}</p>
+              <p className="text-xs text-slate-300">{tech.desc}</p>
             </div>
           ))}
         </div>

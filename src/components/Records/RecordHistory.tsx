@@ -148,7 +148,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
               placeholder="Search category, payee, notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full glass-input text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
@@ -156,7 +156,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           <select
             value={selectedHomeFilter}
             onChange={(e) => setSelectedHomeFilter(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="all">🏠 All Homes ({homes.length})</option>
             {homes.map(h => (
@@ -170,7 +170,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           <select
             value={selectedCategoryFilter}
             onChange={(e) => handleCategoryFilterChange(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="all">📋 All Categories</option>
             {CATEGORIES.map(cat => (
@@ -183,7 +183,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             <select
               value={selectedSubcategoryFilter}
               onChange={(e) => setSelectedSubcategoryFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+              className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
             >
               <option value="all">💡 All {selectedCategoryFilter}</option>
               {availableSubcategories.map(sub => (
@@ -196,7 +196,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           <select
             value={selectedTypeFilter}
             onChange={(e) => setSelectedTypeFilter(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="all">🔧 All Types</option>
             {TYPES.map(t => (
@@ -210,7 +210,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           <select
             value={sortBy}
             onChange={(e: any) => setSortBy(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-white text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="date-desc">📅 Newest First</option>
             <option value="date-asc">📅 Oldest First</option>
@@ -300,7 +300,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                       </p>
                     )}
 
-                    <div className="pt-1 flex items-center gap-2 text-[11px] text-slate-500">
+                    <div className="pt-1 flex items-center gap-2 text-xs text-slate-400">
                       <span>💳 {record.paymentType}</span>
                       <span>• 🕐 {record.time}</span>
                     </div>

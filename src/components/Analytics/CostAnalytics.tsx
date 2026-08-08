@@ -95,7 +95,7 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <div className="bg-slate-900 border border-slate-750 px-4 py-2 rounded-xl text-right">
+          <div className="bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-right">
             <span className="text-xs text-slate-400 block font-medium">Total Filtered Spending</span>
             <span className="text-xl font-extrabold text-white font-mono">
               ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

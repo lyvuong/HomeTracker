@@ -726,7 +726,7 @@ export const App: React.FC = () => {
   const unreadRemindersCount = reminders.filter(rem => !rem.isCompleted).length;
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans pb-24 lg:pb-0 transition-colors ${
+    <div className={`min-h-screen flex flex-col font-sans pb-24 transition-colors ${
       theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
 
@@ -895,7 +895,7 @@ export const App: React.FC = () => {
       <PWAInstallPrompt />
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500 no-print">
+      <footer className="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs font-medium text-slate-300 no-print">
         <p>HomeTracker Progressive Web App • Cloudflare Pages Ready • Offline Capable</p>
       </footer>
 
