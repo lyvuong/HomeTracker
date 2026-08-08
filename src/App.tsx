@@ -483,7 +483,11 @@ export const App: React.FC = () => {
   // Handlers for Maintenance Records
   const handleSaveRecord = (recordData: Partial<EnrichedHomeRecord>) => {
     if (!activeHomeId) return;
-    const home = homes.find(h => h.id === activeHomeId);
+    // The form's "Target Home" selector lets a record be (re)assigned to any
+    // home, not just the one currently active in the app — always defer to
+    // it when present so editing a record's home actually moves it.
+    const targetHomeId = recordData.homeId || activeHomeId;
+    const home = homes.find(h => h.id === targetHomeId);
     if (!home) return;
 
     const isEdit = !!editingRecord;
@@ -501,7 +505,7 @@ export const App: React.FC = () => {
 
     const newRecord: HomeRecord = {
       id: recordId,
-      homeId: activeHomeId,
+      homeId: targetHomeId,
       category,
       subcategory,
       type: recordData.type || 'Maintenance',
@@ -558,6 +562,35 @@ export const App: React.FC = () => {
       deleteFirestoreRecord(user.uid, id, familyCode);
       deleteRTDBRecord(user.uid, id, familyCode);
       deleteFirestoreTransaction(user.uid, id, familyCode);
+    }
+  };
+
+  // Detaches a record from its home, keeping only the underlying Transaction
+  // (the shared, app-agnostic ledger entry) intact — used when a logged item
+  // turns out not to be a home expense at all. Only the HomeRecord is
+  // removed; the Transaction document is left alone so it still shows up
+  // wherever the generic transactions collection is consumed. Its category
+  // is reset to the "Expense - Other" namespace (rather than left as
+  // "Home - ...") so the shared Expense app recognizes it as its own
+  // editable row instead of a foreign, read-only Home entry.
+  const handleMoveRecordToExpense = (record: EnrichedHomeRecord) => {
+    if (!confirm('Move this log out of the home history and keep it only as a general expense? It will no longer appear on this home.')) return;
+    setRecords(prev => prev.filter(r => r.id !== record.id));
+    setIsServiceModalOpen(false);
+    setEditingRecord(null);
+
+    const transaction = transactions.find(t => t.id === record.id);
+    if (transaction && transaction.category !== 'Expense - Other') {
+      const updatedTransaction: Transaction = { ...transaction, category: 'Expense - Other' };
+      setTransactions(prev => prev.map(t => (t.id === record.id ? updatedTransaction : t)));
+      if (user && isFirebaseActive) {
+        saveFirestoreTransaction(user.uid, updatedTransaction, familyCode);
+      }
+    }
+
+    if (user && isFirebaseActive) {
+      deleteFirestoreRecord(user.uid, record.id, familyCode);
+      deleteRTDBRecord(user.uid, record.id, familyCode);
     }
   };
 
@@ -805,6 +838,7 @@ export const App: React.FC = () => {
         initialRecord={editingRecord}
         paymentTypes={paymentTypes}
         onManagePaymentTypes={() => setIsPaymentTypesModalOpen(true)}
+        onMoveToExpense={handleMoveRecordToExpense}
       />
 
       <HouseModal

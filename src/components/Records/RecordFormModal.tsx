@@ -3,7 +3,7 @@ import {
   X, Save, Wrench, BellPlus, Landmark, Settings2, Home as HomeIcon,
   Calendar, Clock, DollarSign, Tag, User, FileText,
   Zap, Droplets, Thermometer, Sparkles, ShieldCheck, Layers, ChevronDown,
-  RotateCcw, Receipt, CheckCircle2, Building
+  RotateCcw, Receipt, CheckCircle2, Building, Link2Off
 } from 'lucide-react';
 import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType, PaymentTypeItem } from '../../types';
 import { CATEGORIES, TYPES, getSubcategories, CATEGORY_COLORS } from '../../constants/categories';
@@ -17,6 +17,7 @@ interface RecordFormModalProps {
   initialRecord?: EnrichedHomeRecord | null;
   paymentTypes?: PaymentTypeItem[];
   onManagePaymentTypes?: () => void;
+  onMoveToExpense?: (record: EnrichedHomeRecord) => void;
 }
 
 // Visual category icon map for quick selection
@@ -57,7 +58,8 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   activeHomeId,
   initialRecord,
   paymentTypes = [],
-  onManagePaymentTypes
+  onManagePaymentTypes,
+  onMoveToExpense
 }) => {
   const costInputRef = useRef<HTMLInputElement>(null);
 
@@ -249,6 +251,18 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     <HomeIcon className="w-3.5 h-3.5 text-emerald-600" />
                     <span className="truncate max-w-[200px] sm:max-w-none">{activeHomeNickname}</span>
                   </p>
+                )}
+
+                {/* Move to Expense Button */}
+                {initialRecord && onMoveToExpense && (
+                  <button
+                    type="button"
+                    onClick={() => onMoveToExpense(initialRecord)}
+                    className="text-[10px] font-semibold text-purple-600 hover:text-purple-800 flex items-center gap-0.5 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200 transition-colors ml-1"
+                    title="Remove this log from the home and keep it only as a general expense"
+                  >
+                    <Link2Off className="w-3 h-3" /> Move to Expense
+                  </button>
                 )}
               </div>
             </div>
