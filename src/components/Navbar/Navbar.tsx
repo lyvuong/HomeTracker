@@ -44,17 +44,17 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-16 gap-3">
 
           {/* Logo & App Name */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <img
               src="/favicon.svg"
               alt="HomeTracker Icon"
-              className="w-10 h-10 rounded-xl shadow-lg shadow-emerald-500/25 ring-1 ring-white/20 object-cover"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl shadow-lg shadow-emerald-500/25 ring-1 ring-white/20 object-cover"
             />
-            <div>
+            <div className="hidden sm:block">
               <span className={`text-xl font-black tracking-tight font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 Home<span className="text-emerald-500">Tracker</span>
               </span>
-              <span className={`hidden sm:inline-block ml-2 text-[10px] uppercase font-bold px-2 py-0.5 border rounded-md tracking-wider ${
+              <span className={`hidden md:inline-block ml-2 text-[10px] uppercase font-bold px-2 py-0.5 border rounded-md tracking-wider ${
                 isDark 
                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
                   : 'bg-emerald-50 text-emerald-700 border-emerald-200'
