@@ -883,11 +883,12 @@ export const App: React.FC = () => {
         paymentTypes={paymentTypes}
       />
 
-      {/* Navigation Bar */}
+      {/* Bottom Navigation Bar */}
       <TabNavigation
         activeTab={activeTab}
         onTabChange={setActiveTab}
         unreadRemindersCount={unreadRemindersCount}
+        theme={theme}
       />
 
       {/* PWA Home Screen Install Banner */}

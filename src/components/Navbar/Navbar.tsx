@@ -1,5 +1,5 @@
 import React from 'react';
-import { PlusCircle, Wifi, WifiOff, Cloud, Database, Settings, Info, Sun, Moon } from 'lucide-react';
+import { PlusCircle, Wifi, WifiOff, Cloud, Database, Settings, Sun, Moon } from 'lucide-react';
 import type { Home, UserProfile } from '../../types';
 
 interface NavbarProps {
@@ -25,7 +25,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAddService,
   onOpenAddHome,
   onOpenSettings,
-  onOpenAbout,
   user,
   isOnline,
   isFirebaseActive,
@@ -165,20 +164,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="hidden sm:inline">Log Expense</span>
             </button>
 
-            {/* About Page Button */}
-            {onOpenAbout && (
-              <button
-                onClick={onOpenAbout}
-                className={`p-2 rounded-xl border transition-all ${
-                  isDark
-                    ? 'text-slate-400 hover:text-emerald-400 bg-slate-800 hover:bg-slate-700/80 border-slate-700'
-                    : 'text-slate-500 hover:text-emerald-600 bg-slate-100 hover:bg-slate-200 border-slate-200'
-                }`}
-                title="About HomeTracker & App Info"
-              >
-                <Info className="w-4 h-4" />
-              </button>
-            )}
+
 
             {/* Settings & Config Button */}
             <button
