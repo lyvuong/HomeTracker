@@ -1,11 +1,45 @@
 @import "tailwindcss";
 
 @layer base {
-  body {
+  html.dark body, body {
     background-color: #090d16;
     color: #f1f5f9;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
+
+  html.light body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Light Theme Component Overrides */
+html.light .glass-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #e2e8f0;
+}
+
+html.light .glass-card {
+  background: #ffffff;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+html.light .glass-input {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+html.light .glass-input:focus {
+  border-color: #059669;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
 }
 
 /* Custom Scrollbar */
@@ -13,40 +47,25 @@
   width: 8px;
   height: 8px;
 }
-::-webkit-scrollbar-track {
+
+html.dark ::-webkit-scrollbar-track {
   background: #0f172a;
 }
-::-webkit-scrollbar-thumb {
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
   background: #334155;
   border-radius: 4px;
 }
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-/* Glassmorphism utilities */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-card {
-  background: rgba(30, 41, 59, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.glass-input {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-.glass-input:focus {
-  border-color: #10b981;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  background: #059669;
 }
 
 /* Glow effects */

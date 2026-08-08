@@ -80,6 +80,21 @@ export const App: React.FC = () => {
   const [activeHomeId, setActiveHomeIdState] = useState<string>(() => getActiveHomeId());
   const [familyCode, setFamilyCodeState] = useState<string>(() => getStoredFamilyCode());
 
+  // Global App-wide Theme State ('light' | 'dark')
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('hometracker_theme') as 'light' | 'dark') || 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.classList.toggle('light', theme === 'light');
+    localStorage.setItem('hometracker_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [isFirebaseActive, setIsFirebaseActive] = useState<boolean>(false);
@@ -711,7 +726,9 @@ export const App: React.FC = () => {
   const unreadRemindersCount = reminders.filter(rem => !rem.isCompleted).length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-24 lg:pb-0">
+    <div className={`min-h-screen flex flex-col font-sans pb-24 lg:pb-0 transition-colors ${
+      theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+    }`}>
 
       {/* Top Banner Navigation Header */}
       <Navbar
@@ -731,6 +748,8 @@ export const App: React.FC = () => {
         isFirebaseActive={isFirebaseActive}
         user={user}
         familyCode={familyCode}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Content Area */}
@@ -839,6 +858,8 @@ export const App: React.FC = () => {
         paymentTypes={paymentTypes}
         onManagePaymentTypes={() => setIsPaymentTypesModalOpen(true)}
         onMoveToExpense={handleMoveRecordToExpense}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       <HouseModal
