@@ -69,8 +69,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     <div className="space-y-6">
 
       {/* Active Home Hero Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-emerald-950/40 border border-slate-800 p-6 sm:p-8 shadow-xl">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-8 shadow-xl text-white">
+        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
 
@@ -79,45 +79,45 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <img
                 src={activeHome.photoUrl}
                 alt={activeHome.nickname}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-lg"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-emerald-400/50 shadow-lg"
               />
             ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-emerald-600 to-indigo-600 flex items-center justify-center shadow-lg border border-white/10">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg border border-white/20">
                 <Home className="w-10 h-10 text-white" />
               </div>
             )}
 
             <div>
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <span className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-xs font-semibold px-2.5 py-0.5 rounded-full">
                   {activeHome.propertyType}
                 </span>
                 {activeHome.yearBuilt && (
-                  <span className="bg-slate-800 text-slate-300 border border-slate-700 text-xs font-mono px-2 py-0.5 rounded-md font-semibold">
+                  <span className="bg-slate-800/90 text-slate-200 border border-slate-700 text-xs font-mono px-2 py-0.5 rounded-md font-semibold">
                     Built {activeHome.yearBuilt}
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold !text-white tracking-tight">
                 {activeHome.nickname}
               </h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-300 mt-1">
                 {activeHome.address}
               </p>
             </div>
           </div>
 
           {/* Square Footage Display */}
-          <div className="bg-slate-850/90 border border-slate-750 p-4 rounded-2xl flex flex-col justify-center min-w-[220px] shadow-inner">
-            <div className="flex items-center gap-1 text-xs text-slate-400 font-medium mb-1">
+          <div className="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl flex flex-col justify-center min-w-[220px] shadow-inner text-white">
+            <div className="flex items-center gap-1 text-xs text-slate-300 font-medium mb-1">
               <Ruler className="w-3.5 h-3.5 text-emerald-400" />
               Square Footage
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-mono font-extrabold text-white tracking-wider">
+              <span className="text-2xl font-mono font-extrabold !text-white tracking-wider">
                 {activeHome.squareFootage ? activeHome.squareFootage.toLocaleString() : '—'}
               </span>
-              <span className="text-xs text-slate-400 font-semibold">sq ft</span>
+              <span className="text-xs text-slate-300 font-semibold">sq ft</span>
             </div>
           </div>
 

@@ -14,32 +14,63 @@
   }
 }
 
-/* Light Theme Component Overrides */
+/* Light Mode Overrides for Glass Cards & Panels */
 html.light .glass-panel {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid #e2e8f0;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
 html.light .glass-card {
-  background: #ffffff;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Ensure headings & primary numbers inside glass cards in Light Mode are crisp dark slate */
+html.light .glass-card h1,
+html.light .glass-card h2,
+html.light .glass-card h3,
+html.light .glass-card h4,
+html.light .glass-card .text-2xl,
+html.light .glass-card .text-3xl,
+html.light .glass-card .text-xl,
+html.light .glass-card .text-lg,
+html.light .glass-panel h1,
+html.light .glass-panel h2,
+html.light .glass-panel h3,
+html.light .glass-panel h4 {
+  color: #0f172a !important;
+}
+
+html.light .glass-card .text-slate-400,
+html.light .glass-panel .text-slate-400 {
+  color: #475569 !important;
 }
 
 html.light .glass-input {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  color: #0f172a;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
 }
 
 html.light .glass-input:focus {
-  border-color: #059669;
+  border-color: #059669 !important;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  color: #0f172a !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #64748b !important;
 }
 
 /* Custom Scrollbar */

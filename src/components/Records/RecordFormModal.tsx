@@ -113,7 +113,6 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      // Auto-focus cost input on open after animation
       const timer = setTimeout(() => {
         costInputRef.current?.focus();
       }, 100);
@@ -230,7 +229,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-md overflow-hidden ${
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-1.5 sm:p-3 backdrop-blur-md overflow-hidden ${
       isDark ? 'bg-slate-950/80' : 'bg-slate-900/60'
     }`}>
       {/* Background overlay click handler */}
@@ -240,41 +239,41 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
         aria-hidden="true"
       />
 
-      {/* Main Dialog Container - Supports Selectable Light & Dark Themes */}
-      <div className={`relative w-full max-h-[92vh] sm:max-w-2xl border rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-150 ${
+      {/* Main Dialog Container - Ultra Compact Dimensions to Avoid Scrolling */}
+      <div className={`relative w-full max-h-[96vh] sm:max-w-2xl border rounded-xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-150 ${
         isDark 
           ? 'bg-slate-900 border-slate-800 text-white' 
           : 'bg-white border-slate-200/80 text-slate-900'
       }`}>
 
-        {/* Header */}
-        <div className={`sticky top-0 z-20 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-3.5 border-b backdrop-blur-md shrink-0 ${
+        {/* Compact Header */}
+        <div className={`sticky top-0 z-20 flex items-center justify-between px-3.5 py-2.5 sm:px-5 sm:py-3 border-b backdrop-blur-md shrink-0 ${
           isDark 
             ? 'border-slate-800 bg-slate-900/95 text-white' 
             : 'border-slate-100 bg-white/95 text-slate-900'
         }`}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <div 
-              className="p-2 rounded-xl shrink-0 flex items-center justify-center transition-colors shadow-sm"
+              className="p-1.5 rounded-lg shrink-0 flex items-center justify-center transition-colors shadow-xs"
               style={{ backgroundColor: `${categoryColor}15`, color: categoryColor, border: `1px solid ${categoryColor}30` }}
             >
-              <Receipt className="w-5 h-5" />
+              <Receipt className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold leading-snug tracking-tight">
+              <h2 className="text-sm sm:text-base font-bold leading-tight tracking-tight">
                 {initialRecord ? 'Edit Expense Record' : 'Log New Home Expense'}
               </h2>
               <div className="flex items-center gap-2 mt-0.5">
                 {homes.length > 1 ? (
                   <div className="relative flex items-center">
-                    <HomeIcon className={`w-3.5 h-3.5 mr-1 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                    <HomeIcon className={`w-3 h-3 mr-1 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
                     <select
                       value={homeId}
                       onChange={(e) => setHomeId(e.target.value)}
-                      className={`text-xs font-semibold rounded-md py-0.5 pl-1.5 pr-5 border focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer ${
+                      className={`text-[11px] font-semibold rounded-md py-0.5 pl-1.5 pr-4 border focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer ${
                         isDark 
-                          ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700' 
-                          : 'bg-slate-100 hover:bg-slate-200/70 text-slate-800 border-slate-200'
+                          ? 'bg-slate-800 text-slate-200 border-slate-700' 
+                          : 'bg-slate-100 text-slate-800 border-slate-200'
                       }`}
                     >
                       {homes.map((h) => (
@@ -283,9 +282,9 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     </select>
                   </div>
                 ) : (
-                  <p className={`text-xs font-medium flex items-center gap-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    <HomeIcon className={`w-3.5 h-3.5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
-                    <span className="truncate max-w-[200px] sm:max-w-none">{activeHomeNickname}</span>
+                  <p className={`text-[11px] font-medium flex items-center gap-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    <HomeIcon className={`w-3 h-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                    <span className="truncate max-w-[180px] sm:max-w-none">{activeHomeNickname}</span>
                   </p>
                 )}
 
@@ -294,12 +293,11 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                   <button
                     type="button"
                     onClick={() => onMoveToExpense(initialRecord)}
-                    className={`text-[10px] font-semibold flex items-center gap-0.5 px-2 py-0.5 rounded-md border transition-colors ml-1 ${
+                    className={`text-[10px] font-semibold flex items-center gap-0.5 px-2 py-0.5 rounded-md border transition-colors ${
                       isDark 
-                        ? 'text-purple-400 hover:text-purple-300 bg-purple-950/60 border-purple-500/40' 
-                        : 'text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border-purple-200'
+                        ? 'text-purple-400 bg-purple-950/60 border-purple-500/40' 
+                        : 'text-purple-600 bg-purple-50 border-purple-200'
                     }`}
-                    title="Remove this log from the home and keep it only as a general expense"
                   >
                     <Link2Off className="w-3 h-3" /> Move to Expense
                   </button>
@@ -309,11 +307,11 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
           </div>
           
           <div className="flex items-center gap-1.5">
-            {/* Theme Selectable Toggle Switcher */}
+            {/* Theme Toggle Button */}
             <button
               type="button"
               onClick={handleToggleTheme}
-              className={`p-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-bold transition-all active:scale-95 touch-manipulation ${
+              className={`p-1.5 rounded-lg border flex items-center gap-1 text-[11px] font-bold transition-all active:scale-95 touch-manipulation ${
                 isDark
                   ? 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-slate-700'
                   : 'bg-slate-100 hover:bg-slate-200 text-indigo-700 border-slate-200'
@@ -322,62 +320,62 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             >
               {isDark ? (
                 <>
-                  <Sun className="w-4 h-4 text-amber-400" />
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
                   <span className="hidden sm:inline">Light</span>
                 </>
               ) : (
                 <>
-                  <Moon className="w-4 h-4 text-indigo-600" />
+                  <Moon className="w-3.5 h-3.5 text-indigo-600" />
                   <span className="hidden sm:inline">Dark</span>
                 </>
               )}
             </button>
 
-            {/* Close Modal Button */}
+            {/* Close Button */}
             <button
               type="button"
               onClick={onClose}
-              className={`p-1.5 rounded-xl transition-colors active:scale-95 touch-manipulation ${
+              className={`p-1.5 rounded-lg transition-colors active:scale-95 touch-manipulation ${
                 isDark 
                   ? 'text-slate-400 hover:text-white hover:bg-slate-800' 
                   : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
               }`}
               aria-label="Close dialog"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4.5 h-4.5" />
             </button>
           </div>
         </div>
 
-        {/* Scrollable Form Body */}
+        {/* Compact Form Body - Fits Viewport Without Vertical Scrolling */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 custom-scrollbar">
 
-            {/* ROW 1: Hero Amount Entry (Col 7) + Quick Add Chips (Col 5) */}
-            <div className={`border rounded-xl p-3.5 relative transition-all ${
+            {/* ROW 1: Hero Amount Entry & Quick Add Chips */}
+            <div className={`border rounded-lg p-2.5 relative transition-all ${
               isDark
-                ? 'bg-slate-950/70 border-slate-800 focus-within:border-emerald-500/60 focus-within:ring-2 focus-within:ring-emerald-500/20'
-                : 'bg-emerald-50/60 border-emerald-200/80 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20'
+                ? 'bg-slate-950/70 border-slate-800'
+                : 'bg-emerald-50/60 border-emerald-200/80'
             }`}>
-              <div className="grid grid-cols-12 gap-3 items-center">
+              <div className="grid grid-cols-12 gap-2 items-center">
                 
                 {/* Cost Input Box */}
                 <div className="col-span-12 sm:col-span-7">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                  <div className="flex items-center justify-between mb-0.5">
+                    <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                       isDark ? 'text-slate-400' : 'text-emerald-900'
                     }`}>
-                      <DollarSign className={`w-3.5 h-3.5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
+                      <DollarSign className={`w-3 h-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
                       Expense Amount <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
                     </label>
                     {typeof cost === 'number' && cost > 0 && (
                       <button
                         type="button"
                         onClick={() => setCost('')}
-                        className={`text-[10px] font-semibold flex items-center gap-0.5 px-1.5 py-0.5 rounded border transition-colors ${
+                        className={`text-[9px] font-semibold flex items-center gap-0.5 px-1 py-0.2 rounded border ${
                           isDark 
-                            ? 'text-slate-400 hover:text-slate-200 bg-slate-900 border-slate-800' 
-                            : 'text-slate-500 hover:text-slate-800 bg-white border-slate-200'
+                            ? 'text-slate-400 bg-slate-900 border-slate-800' 
+                            : 'text-slate-500 bg-white border-slate-200'
                         }`}
                       >
                         <RotateCcw className="w-2.5 h-2.5" /> Clear
@@ -385,7 +383,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     )}
                   </div>
                   <div className="relative flex items-center">
-                    <span className={`text-2xl font-extrabold font-mono select-none mr-1.5 ${
+                    <span className={`text-xl font-extrabold font-mono select-none mr-1 ${
                       isDark ? 'text-slate-400' : 'text-emerald-700'
                     }`}>$</span>
                     <input
@@ -398,7 +396,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       placeholder="0.00"
                       value={cost}
                       onChange={(e) => setCost(e.target.value === '' ? '' : Number(e.target.value))}
-                      className={`w-full bg-transparent text-2xl sm:text-3xl font-black font-mono focus:outline-none tracking-tight ${
+                      className={`w-full bg-transparent text-xl sm:text-2xl font-black font-mono focus:outline-none tracking-tight ${
                         isDark 
                           ? 'text-white placeholder:text-slate-600' 
                           : 'text-slate-900 placeholder:text-slate-400'
@@ -408,10 +406,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                 </div>
 
                 {/* Quick Add Chips */}
-                <div className={`col-span-12 sm:col-span-5 sm:border-l pt-2 sm:pt-0 ${
-                  isDark ? 'sm:border-slate-800 sm:pl-3' : 'sm:border-emerald-200/80 sm:pl-3'
+                <div className={`col-span-12 sm:col-span-5 sm:border-l pt-1 sm:pt-0 ${
+                  isDark ? 'sm:border-slate-800 sm:pl-2.5' : 'sm:border-emerald-200/80 sm:pl-2.5'
                 }`}>
-                  <span className={`block text-[10px] font-bold uppercase tracking-wider mb-1 ${
+                  <span className={`block text-[9px] font-bold uppercase tracking-wider mb-0.5 ${
                     isDark ? 'text-slate-500' : 'text-emerald-800'
                   }`}>Quick Add</span>
                   <div className="flex flex-wrap items-center gap-1">
@@ -420,10 +418,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                         key={amt}
                         type="button"
                         onClick={() => handleAddCost(amt)}
-                        className={`text-xs font-semibold px-2 py-0.5 rounded-md border transition-all active:scale-95 touch-manipulation ${
+                        className={`text-[11px] font-semibold px-2 py-0.5 rounded border transition-all active:scale-95 touch-manipulation ${
                           isDark
-                            ? 'text-slate-300 hover:text-white bg-slate-900 hover:bg-emerald-500/20 border-slate-800 hover:border-emerald-500/40'
-                            : 'text-emerald-800 hover:text-emerald-950 bg-white hover:bg-emerald-100/80 border-emerald-200 shadow-2xs'
+                            ? 'text-slate-300 bg-slate-900 hover:bg-emerald-500/20 border-slate-800'
+                            : 'text-emerald-800 bg-white hover:bg-emerald-100/80 border-emerald-200 shadow-2xs'
                         }`}
                       >
                         +${amt}
@@ -436,12 +434,12 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             </div>
 
             {/* ROW 2: Category Chips & Selector */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                   isDark ? 'text-slate-300' : 'text-slate-700'
                 }`}>
-                  <Tag className="w-3.5 h-3.5 text-amber-500" />
+                  <Tag className="w-3 h-3 text-amber-500" />
                   Category <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
                 </label>
                 
@@ -450,22 +448,22 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                   <select
                     value={category}
                     onChange={(e) => handleCategoryChange(e.target.value as MaintenanceCategory)}
-                    className={`text-xs font-semibold rounded-lg py-1 px-2.5 pr-6 border focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer appearance-none truncate max-w-[160px] ${
+                    className={`text-[11px] font-semibold rounded-md py-0.5 px-2 pr-5 border focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer appearance-none truncate max-w-[150px] ${
                       isDark
-                        ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
-                        : 'bg-slate-100 hover:bg-slate-200/80 text-slate-800 border-slate-200'
+                        ? 'bg-slate-800 text-slate-200 border-slate-700'
+                        : 'bg-slate-100 text-slate-800 border-slate-200'
                     }`}
                   >
                     {CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
-              {/* Visual Category Chips */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              {/* Visual Category Chips (Compact 4 Columns) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
                 {FEATURED_CATEGORIES.map((catName) => {
                   const isSelected = category === catName;
                   const catColor = CATEGORY_COLORS[catName] || (isDark ? '#34d399' : '#059669');
@@ -476,26 +474,26 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       key={catName}
                       type="button"
                       onClick={() => handleCategoryChange(catName)}
-                      className={`flex items-center gap-2 p-2 rounded-xl border text-left transition-all active:scale-98 touch-manipulation ${
+                      className={`flex items-center gap-1.5 p-1.5 rounded-lg border text-left transition-all active:scale-98 touch-manipulation ${
                         isSelected
                           ? isDark
-                            ? 'bg-slate-800 text-white font-bold border-emerald-500/60 shadow-md'
-                            : 'bg-emerald-600 text-white font-bold border-emerald-600 shadow-sm'
+                            ? 'bg-slate-800 text-white font-bold border-emerald-500/60 shadow-xs'
+                            : 'bg-emerald-600 text-white font-bold border-emerald-600 shadow-xs'
                           : isDark
-                            ? 'bg-slate-950/40 text-slate-400 font-medium border-slate-800 hover:bg-slate-800/50 hover:text-slate-200'
-                            : 'bg-slate-50 text-slate-700 font-medium border-slate-200/80 hover:bg-slate-100 hover:text-slate-900'
+                            ? 'bg-slate-950/40 text-slate-400 font-medium border-slate-800 hover:bg-slate-800/50'
+                            : 'bg-slate-50 text-slate-700 font-medium border-slate-200/80 hover:bg-slate-100'
                       }`}
                     >
                       <div
-                        className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+                        className="w-5 h-5 rounded flex items-center justify-center shrink-0"
                         style={{
                           backgroundColor: isSelected ? (isDark ? `${catColor}35` : 'rgba(255, 255, 255, 0.25)') : `${catColor}15`,
                           color: isSelected ? '#ffffff' : catColor
                         }}
                       >
-                        <IconComp className="w-3.5 h-3.5" />
+                        <IconComp className="w-3 h-3" />
                       </div>
-                      <span className="text-xs truncate">{catName}</span>
+                      <span className="text-[11px] truncate">{catName}</span>
                     </button>
                   );
                 })}
@@ -503,10 +501,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
 
               {/* Subcategories Pills */}
               {subcategories.length > 0 && (
-                <div className={`border rounded-xl p-2.5 mt-1.5 ${
+                <div className={`border rounded-lg p-2 mt-1 ${
                   isDark ? 'bg-slate-950/40 border-slate-800/80' : 'bg-slate-50 border-slate-200'
                 }`}>
-                  <label className={`block text-[10px] font-bold mb-1.5 uppercase tracking-wider ${
+                  <label className={`block text-[9px] font-bold mb-1 uppercase tracking-wider ${
                     isDark ? 'text-slate-400' : 'text-slate-500'
                   }`}>
                     {category} Subcategory <span className="font-normal lowercase opacity-70">(optional)</span>
@@ -515,14 +513,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setSubcategory('')}
-                      className={`text-xs font-semibold px-2 py-0.5 rounded-md border transition-all ${
+                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
                         subcategory === ''
-                          ? isDark
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold'
-                            : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold'
-                          : isDark
-                            ? 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
-                            : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
+                          ? isDark ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold' : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold'
+                          : isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-white text-slate-600 border-slate-200'
                       }`}
                     >
                       None
@@ -532,14 +526,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                         key={sub}
                         type="button"
                         onClick={() => setSubcategory(sub)}
-                        className={`text-xs font-semibold px-2 py-0.5 rounded-md border transition-all ${
+                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
                           subcategory === sub
-                            ? isDark
-                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold'
-                              : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold'
-                            : isDark
-                              ? 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
-                              : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
+                            ? isDark ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold' : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold'
+                            : isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-white text-slate-600 border-slate-200'
                         }`}
                       >
                         {sub}
@@ -552,13 +542,13 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
 
             {/* ROW 3: Record Type Segmented Bar */}
             <div className="space-y-1">
-              <label className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+              <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                 isDark ? 'text-slate-300' : 'text-slate-700'
               }`}>
-                <Wrench className="w-3.5 h-3.5 text-indigo-500" />
+                <Wrench className="w-3 h-3 text-indigo-500" />
                 Record Type <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
               </label>
-              <div className={`grid grid-cols-5 gap-1 p-1 rounded-xl border ${
+              <div className={`grid grid-cols-5 gap-1 p-0.5 rounded-lg border ${
                 isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-slate-100 border-slate-200'
               }`}>
                 {TYPES.map((t) => {
@@ -568,14 +558,14 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       key={t}
                       type="button"
                       onClick={() => setType(t)}
-                      className={`py-1.5 px-1 rounded-lg text-xs font-bold text-center transition-all active:scale-95 touch-manipulation truncate ${
+                      className={`py-1 px-1 rounded text-[11px] font-bold text-center transition-all active:scale-95 touch-manipulation truncate ${
                         isSelected
                           ? isDark
                             ? 'bg-slate-800 text-white shadow-xs border-l-2 border-l-emerald-400'
                             : 'bg-white text-slate-900 shadow-xs border border-slate-200/80'
                           : isDark
-                            ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-                            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
+                            ? 'text-slate-400 hover:text-slate-200'
+                            : 'text-slate-500 hover:text-slate-800'
                       }`}
                     >
                       {t}
@@ -586,29 +576,29 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             </div>
 
             {/* ROW 4: Date & Time Side-by-Side Row */}
-            <div className="grid grid-cols-12 gap-3 items-end">
+            <div className="grid grid-cols-12 gap-2 items-end">
               
               {/* Date Input (7 Cols) */}
-              <div className="col-span-12 sm:col-span-7 space-y-1">
-                <div className="flex items-center justify-between mb-1">
-                  <label className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+              <div className="col-span-12 sm:col-span-7 space-y-0.5">
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                     isDark ? 'text-slate-300' : 'text-slate-700'
                   }`}>
-                    <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                    <Calendar className="w-3 h-3 text-indigo-500" />
                     Date <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
                   </label>
                   
                   {/* Today & Yesterday Buttons */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => handleSetQuickDate('today')}
-                      className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-all active:scale-95 touch-manipulation ${
+                      className={`text-[11px] font-bold px-2 py-0.5 rounded border transition-all active:scale-95 touch-manipulation ${
                         date === todayStr
                           ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
                           : isDark
-                            ? 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
-                            : 'bg-slate-100 text-slate-700 border-slate-200/80 hover:bg-slate-200 hover:text-slate-900'
+                            ? 'bg-slate-800 text-slate-400 border-slate-700'
+                            : 'bg-slate-100 text-slate-700 border-slate-200/80'
                       }`}
                     >
                       Today
@@ -616,12 +606,12 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleSetQuickDate('yesterday')}
-                      className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-all active:scale-95 touch-manipulation ${
+                      className={`text-[11px] font-bold px-2 py-0.5 rounded border transition-all active:scale-95 touch-manipulation ${
                         date === yesterdayStr
                           ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
                           : isDark
-                            ? 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
-                            : 'bg-slate-100 text-slate-700 border-slate-200/80 hover:bg-slate-200 hover:text-slate-900'
+                            ? 'bg-slate-800 text-slate-400 border-slate-700'
+                            : 'bg-slate-100 text-slate-700 border-slate-200/80'
                       }`}
                     >
                       Yesterday
@@ -634,7 +624,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className={`w-full text-xs sm:text-sm font-semibold rounded-xl py-2 px-3 border focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 ${
+                  className={`w-full text-xs font-semibold rounded-lg py-1.5 px-2.5 border focus:outline-none focus:border-indigo-500 ${
                     isDark 
                       ? 'bg-slate-950/80 border-slate-800 text-white' 
                       : 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
@@ -643,11 +633,11 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
               </div>
 
               {/* Time Input (5 Cols) */}
-              <div className="col-span-12 sm:col-span-5 space-y-1">
-                <label className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 mb-1 ${
+              <div className="col-span-12 sm:col-span-5 space-y-0.5">
+                <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 mb-0.5 ${
                   isDark ? 'text-slate-300' : 'text-slate-700'
                 }`}>
-                  <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                  <Clock className="w-3 h-3 text-indigo-500" />
                   Time <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
                 </label>
                 <input
@@ -655,7 +645,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                   required
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className={`w-full text-xs sm:text-sm font-semibold rounded-xl py-2 px-3 border focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 ${
+                  className={`w-full text-xs font-semibold rounded-lg py-1.5 px-2.5 border focus:outline-none focus:border-indigo-500 ${
                     isDark 
                       ? 'bg-slate-950/80 border-slate-800 text-white' 
                       : 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
@@ -666,12 +656,12 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             </div>
 
             {/* ROW 5: Payment Method (Col 5) + Provider / Contractor (Col 7) */}
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
               
               {/* Payment Type (5 Cols) */}
-              <div className="sm:col-span-5 space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className={`text-[11px] font-bold uppercase tracking-wider truncate ${
+              <div className="sm:col-span-5 space-y-0.5">
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className={`text-[10px] font-bold uppercase tracking-wider truncate ${
                     isDark ? 'text-slate-300' : 'text-slate-700'
                   }`}>
                     Payment <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
@@ -680,18 +670,18 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     <button
                       type="button"
                       onClick={onManagePaymentTypes}
-                      className={`text-[10px] font-semibold flex items-center gap-0.5 ${
-                        isDark ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'
+                      className={`text-[9px] font-semibold flex items-center gap-0.5 ${
+                        isDark ? 'text-indigo-400' : 'text-indigo-600'
                       }`}
                     >
-                      <Settings2 className="w-3 h-3" /> Info
+                      <Settings2 className="w-2.5 h-2.5" /> Info
                     </button>
                   )}
                 </div>
                 <select
                   value={paymentType}
                   onChange={(e) => setPaymentType(e.target.value as PaymentType)}
-                  className={`w-full text-xs font-semibold rounded-xl py-2 px-2.5 border focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 truncate ${
+                  className={`w-full text-xs font-semibold rounded-lg py-1.5 px-2 border focus:outline-none focus:border-emerald-500 truncate ${
                     isDark 
                       ? 'bg-slate-950/80 border-slate-800 text-white' 
                       : 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white'
@@ -704,25 +694,25 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
               </div>
 
               {/* Provider / Contractor (7 Cols) */}
-              <div className="sm:col-span-7 space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 truncate ${
+              <div className="sm:col-span-7 space-y-0.5">
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 truncate ${
                     isDark ? 'text-slate-300' : 'text-slate-700'
                   }`}>
-                    <User className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                    <User className="w-3 h-3 text-teal-500 shrink-0" />
                     Provider / Contractor
                   </label>
                   <button
                     type="button"
                     onClick={() => setProvider(provider === 'Self / DIY' ? '' : 'Self / DIY')}
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-all ${
+                    className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
                       provider === 'Self / DIY'
                         ? isDark 
                           ? 'bg-teal-500/20 text-teal-300 border-teal-500/40'
                           : 'bg-teal-100 text-teal-800 border-teal-300'
                         : isDark
-                          ? 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
-                          : 'bg-slate-100 text-slate-500 border-slate-200 hover:text-slate-800'
+                          ? 'bg-slate-800 text-slate-400 border-slate-700'
+                          : 'bg-slate-100 text-slate-500 border-slate-200'
                     }`}
                   >
                     Self / DIY
@@ -733,7 +723,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                   placeholder="e.g. Springfield HVAC, Home Depot"
                   value={provider}
                   onChange={(e) => setProvider(e.target.value)}
-                  className={`w-full text-xs rounded-xl py-2 px-2.5 border focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${
+                  className={`w-full text-xs rounded-lg py-1.5 px-2 border focus:outline-none focus:border-teal-500 ${
                     isDark 
                       ? 'bg-slate-950/80 border-slate-800 text-white placeholder:text-slate-500' 
                       : 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white placeholder:text-slate-400'
@@ -744,19 +734,19 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             </div>
 
             {/* ROW 6: Notes & Specifications */}
-            <div className="space-y-1">
-              <label className={`text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+            <div className="space-y-0.5">
+              <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                 isDark ? 'text-slate-300' : 'text-slate-700'
               }`}>
-                <FileText className="w-3.5 h-3.5 text-teal-500" />
+                <FileText className="w-3 h-3 text-teal-500" />
                 Notes & Specifications <span className="opacity-70 font-normal lowercase">(optional)</span>
               </label>
               <textarea
-                rows={1.5}
+                rows={1}
                 placeholder="Filter size, warranty details, receipt number, work performed..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className={`w-full text-xs rounded-xl p-2 resize-none border focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${
+                className={`w-full text-xs rounded-lg p-1.5 resize-none border focus:outline-none focus:border-teal-500 ${
                   isDark 
                     ? 'bg-slate-950/80 border-slate-800 text-white placeholder:text-slate-500' 
                     : 'bg-slate-50 border-slate-200 text-slate-900 focus:bg-white placeholder:text-slate-400'
@@ -765,31 +755,31 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             </div>
 
             {/* ROW 7: Smart Option Toggle Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
               
               {/* Tax Deductible Card */}
               <div 
                 onClick={() => setIsTaxDeductible(!isTaxDeductible)}
-                className={`p-2.5 rounded-xl border cursor-pointer transition-all flex items-center gap-2.5 select-none ${
+                className={`p-2 rounded-lg border cursor-pointer transition-all flex items-center gap-2 select-none ${
                   isTaxDeductible
                     ? isDark
                       ? 'bg-amber-500/10 border-amber-500/50 text-white shadow-xs'
                       : 'bg-amber-50 border-amber-300 text-amber-950 shadow-xs'
                     : isDark
-                      ? 'bg-slate-950/50 border-slate-800 text-slate-400 hover:bg-slate-800/40'
-                      : 'bg-slate-50 border-slate-200/80 text-slate-600 hover:bg-slate-100'
+                      ? 'bg-slate-950/50 border-slate-800 text-slate-400'
+                      : 'bg-slate-50 border-slate-200/80 text-slate-600'
                 }`}
               >
-                <div className={`p-1.5 rounded-lg shrink-0 ${
+                <div className={`p-1 rounded shrink-0 ${
                   isTaxDeductible
                     ? isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-200/60 text-amber-700'
                     : isDark ? 'bg-slate-900 text-slate-500' : 'bg-slate-200/60 text-slate-500'
                 }`}>
-                  <Landmark className="w-4 h-4" />
+                  <Landmark className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className={`text-xs font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Tax Deductible</span>
+                    <span className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Tax Deductible</span>
                     <input
                       type="checkbox"
                       checked={isTaxDeductible}
@@ -800,33 +790,33 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
-                  <p className={`text-[10px] truncate mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Flag for tax reporting</p>
+                  <p className={`text-[9px] truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Flag for tax reporting</p>
                 </div>
               </div>
 
               {/* Schedule Next Reminder Card */}
               <div 
                 onClick={() => setAddNextReminder(!addNextReminder)}
-                className={`p-2.5 rounded-xl border cursor-pointer transition-all flex items-center gap-2.5 select-none ${
+                className={`p-2 rounded-lg border cursor-pointer transition-all flex items-center gap-2 select-none ${
                   addNextReminder
                     ? isDark
                       ? 'bg-emerald-500/10 border-emerald-500/50 text-white shadow-xs'
                       : 'bg-emerald-50 border-emerald-300 text-emerald-950 shadow-xs'
                     : isDark
-                      ? 'bg-slate-950/50 border-slate-800 text-slate-400 hover:bg-slate-800/40'
-                      : 'bg-slate-50 border-slate-200/80 text-slate-600 hover:bg-slate-100'
+                      ? 'bg-slate-950/50 border-slate-800 text-slate-400'
+                      : 'bg-slate-50 border-slate-200/80 text-slate-600'
                 }`}
               >
-                <div className={`p-1.5 rounded-lg shrink-0 ${
+                <div className={`p-1 rounded shrink-0 ${
                   addNextReminder
                     ? isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-200/60 text-emerald-700'
                     : isDark ? 'bg-slate-900 text-slate-500' : 'bg-slate-200/60 text-slate-500'
                 }`}>
-                  <BellPlus className="w-4 h-4" />
+                  <BellPlus className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className={`text-xs font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Schedule Reminder</span>
+                    <span className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Schedule Reminder</span>
                     <input
                       type="checkbox"
                       checked={addNextReminder}
@@ -837,7 +827,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
-                  <p className={`text-[10px] truncate mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Future follow-up notice</p>
+                  <p className={`text-[9px] truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Future follow-up notice</p>
                 </div>
               </div>
 
@@ -845,16 +835,16 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
 
             {/* Expandable Reminder Interval Builder */}
             {addNextReminder && (
-              <div className={`border rounded-xl p-3 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150 ${
+              <div className={`border rounded-lg p-2 space-y-1.5 animate-in fade-in duration-150 ${
                 isDark 
                   ? 'bg-slate-950/70 border-emerald-500/30' 
                   : 'bg-emerald-50/70 border-emerald-200'
               }`}>
                 <div className="flex items-center justify-between">
-                  <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                  <label className={`text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                     isDark ? 'text-emerald-400' : 'text-emerald-900'
                   }`}>
-                    <BellPlus className="w-3.5 h-3.5 text-emerald-600" /> Next Service Due Date
+                    <BellPlus className="w-3 h-3 text-emerald-600" /> Next Service Due Date
                   </label>
                   
                   {/* Interval Presets */}
@@ -868,10 +858,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                         key={item.months}
                         type="button"
                         onClick={() => handleSetReminderInterval(item.months)}
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded border transition-all active:scale-95 ${
+                        className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
                           isDark
-                            ? 'text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/60 border-emerald-500/40'
-                            : 'text-emerald-800 bg-white hover:bg-emerald-100 border-emerald-300'
+                            ? 'text-emerald-300 bg-emerald-950/60 border-emerald-500/40'
+                            : 'text-emerald-800 bg-white border-emerald-300'
                         }`}
                       >
                         {item.label}
@@ -885,7 +875,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                   required={addNextReminder}
                   value={nextServiceDate}
                   onChange={(e) => setNextServiceDate(e.target.value)}
-                  className={`w-full text-xs font-semibold rounded-lg py-1.5 px-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 ${
+                  className={`w-full text-xs font-semibold rounded py-1 px-2 border focus:outline-none ${
                     isDark 
                       ? 'bg-slate-900 border-slate-700 text-white' 
                       : 'bg-white border-slate-200 text-slate-900'
@@ -897,7 +887,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
           </div>
 
           {/* Sticky Action Footer */}
-          <div className={`sticky bottom-0 z-20 flex items-center justify-end gap-2.5 px-4 py-3 sm:px-6 sm:py-3.5 border-t backdrop-blur-md shrink-0 ${
+          <div className={`sticky bottom-0 z-20 flex items-center justify-end gap-2 px-3.5 py-2.5 sm:px-5 sm:py-3 border-t backdrop-blur-md shrink-0 ${
             isDark 
               ? 'border-slate-800 bg-slate-900/95' 
               : 'border-slate-100 bg-white/95'
@@ -905,10 +895,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl border transition-colors active:scale-98 touch-manipulation ${
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors active:scale-98 touch-manipulation ${
                 isDark
-                  ? 'text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-800 border-slate-700/60'
-                  : 'text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 border-slate-200'
+                  ? 'text-slate-300 bg-slate-800/80 border-slate-700/60'
+                  : 'text-slate-600 bg-slate-100 border-slate-200'
               }`}
             >
               Cancel
@@ -916,7 +906,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             <button
               type="submit"
               disabled={cost === ''}
-              className={`flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm px-5 py-2 rounded-xl shadow-md transition-all active:scale-98 touch-manipulation ${
+              className={`flex items-center justify-center gap-1 font-bold text-xs px-4 py-1.5 rounded-lg shadow-md transition-all active:scale-98 touch-manipulation ${
                 cost !== ''
                   ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
                   : isDark
@@ -924,7 +914,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-200'
               }`}
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-3.5 h-3.5" />
               <span>{initialRecord ? 'Save Changes' : 'Log Expense'}</span>
             </button>
           </div>
