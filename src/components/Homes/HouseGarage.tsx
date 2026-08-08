@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import { Home as HomeIcon, Plus, Edit2, Trash2, CheckCircle2, Ruler, Users, Key } from 'lucide-react';
-import type { Home } from '../../types';
+import { Home as HomeIcon, Plus, Edit2, Trash2, CheckCircle2, Ruler, Users, Key, Building2, Building, Hotel, Warehouse } from 'lucide-react';
+import type { Home, PropertyType } from '../../types';
 import { HouseModal } from './HouseModal';
+
+const PROPERTY_TYPE_VISUALS: Record<PropertyType, { icon: React.ComponentType<{ className?: string }>; gradient: string }> = {
+  'Single Family': { icon: HomeIcon, gradient: 'from-slate-900 via-slate-800 to-emerald-950' },
+  'Condo': { icon: Building2, gradient: 'from-slate-900 via-slate-800 to-indigo-950' },
+  'Townhouse': { icon: Building, gradient: 'from-slate-900 via-slate-800 to-amber-950' },
+  'Apartment': { icon: Hotel, gradient: 'from-slate-900 via-slate-800 to-sky-950' },
+  'Other': { icon: Warehouse, gradient: 'from-slate-900 via-slate-800 to-slate-700' },
+};
 
 interface HouseGarageProps {
   homes: Home[];
@@ -137,11 +145,14 @@ export const HouseGarage: React.FC<HouseGarageProps> = ({
                       alt={h.nickname}
                       className="w-full h-full object-cover group-hover/photo:scale-105 transition-transform duration-500"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-tr from-slate-900 via-slate-800 to-emerald-950 flex items-center justify-center">
-                      <HomeIcon className="w-16 h-16 text-slate-700 group-hover/photo:scale-110 transition-transform" />
-                    </div>
-                  )}
+                  ) : (() => {
+                    const { icon: TypeIcon, gradient } = PROPERTY_TYPE_VISUALS[h.propertyType] ?? PROPERTY_TYPE_VISUALS.Other;
+                    return (
+                      <div className={`w-full h-full bg-gradient-to-tr ${gradient} flex items-center justify-center`}>
+                        <TypeIcon className="w-16 h-16 text-slate-300 group-hover/photo:scale-110 transition-transform" />
+                      </div>
+                    );
+                  })()}
 
                   {/* Hover Overlay Prompt for Non-Active Homes */}
                   {!isActive && (
