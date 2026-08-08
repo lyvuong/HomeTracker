@@ -68,56 +68,60 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   return (
     <div className="space-y-6">
 
-      {/* Active Home Hero Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-8 shadow-xl text-white">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+      {/* Active Home Hero Card - Mobile-Optimized & Spacious */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-850 to-emerald-950 p-5 sm:p-7 shadow-xl border border-slate-800 text-white">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="relative z-10 space-y-4 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-6">
 
-          <div className="flex items-center gap-5">
+          {/* Property Identity Info */}
+          <div className="flex items-start sm:items-center gap-3.5 sm:gap-5">
             {activeHome.photoUrl ? (
               <img
                 src={activeHome.photoUrl}
                 alt={activeHome.nickname}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-emerald-400/50 shadow-lg"
+                className="w-16 h-16 sm:w-22 sm:h-22 rounded-2xl object-cover border-2 border-emerald-400/50 shadow-lg shrink-0"
               />
             ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg border border-white/20">
-                <Home className="w-10 h-10 text-white" />
+              <div className="w-16 h-16 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg border border-white/20 shrink-0">
+                <Home className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
             )}
 
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
                   {activeHome.propertyType}
                 </span>
                 {activeHome.yearBuilt && (
-                  <span className="bg-slate-800/90 text-slate-200 border border-slate-700 text-xs font-mono px-2 py-0.5 rounded-md font-semibold">
+                  <span className="bg-slate-800/90 text-slate-200 border border-slate-700 text-[11px] font-mono px-2 py-0.5 rounded-md font-semibold">
                     Built {activeHome.yearBuilt}
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold !text-white tracking-tight">
+              <h1 className="text-xl sm:text-3xl font-extrabold !text-white tracking-tight leading-tight truncate">
                 {activeHome.nickname}
               </h1>
-              <p className="text-xs text-slate-300 mt-1">
-                {activeHome.address}
+              <p className="text-xs text-slate-300 mt-0.5 truncate flex items-center gap-1">
+                <span>{activeHome.address}</span>
               </p>
             </div>
           </div>
 
-          {/* Square Footage Display */}
-          <div className="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl flex flex-col justify-center min-w-[220px] shadow-inner text-white">
-            <div className="flex items-center gap-1 text-xs text-slate-300 font-medium mb-1">
-              <Ruler className="w-3.5 h-3.5 text-emerald-400" />
-              Square Footage
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-mono font-extrabold !text-white tracking-wider">
-                {activeHome.squareFootage ? activeHome.squareFootage.toLocaleString() : '—'}
-              </span>
-              <span className="text-xs text-slate-300 font-semibold">sq ft</span>
+          {/* Quick Specs Pill Row */}
+          <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-800/80">
+            <div className="bg-slate-800/80 border border-slate-700/80 px-4 py-2.5 rounded-2xl flex items-center gap-3 shadow-inner text-white w-full sm:w-auto justify-between sm:justify-start">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+                  <Ruler className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="block text-[10px] uppercase font-bold text-slate-400">Square Footage</span>
+                  <span className="text-base sm:text-lg font-mono font-black !text-white tracking-wide">
+                    {activeHome.squareFootage ? `${activeHome.squareFootage.toLocaleString()} sq ft` : '—'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
