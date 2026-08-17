@@ -12,6 +12,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    // Raise the warning threshold — Firebase alone is ~400 kB minified
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: (id) => {
@@ -25,6 +27,12 @@ export default defineConfig({
             return 'vendor-charts';
           }
         }
+      }
+    },
+    // Vite 6 / rolldown-based builds (Cloudflare Pages)
+    rolldownOptions: {
+      output: {
+        codeSplitting: true
       }
     }
   }
