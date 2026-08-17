@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   X, Save, Wrench, BellPlus, Landmark, Settings2, Home as HomeIcon,
-  Calendar, Clock, DollarSign, Tag, User, FileText,
-  Zap, Droplets, Thermometer, Sparkles, ShieldCheck, Layers, ChevronDown,
-  RotateCcw, Receipt, CheckCircle2, Building, Link2Off, Sun, Moon
+  Calendar, Clock, DollarSign, Tag, User, FileText, ChevronDown,
+  RotateCcw, Receipt, Link2Off, Sun, Moon
 } from 'lucide-react';
-import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType, PaymentTypeItem } from '../../types';
-import { CATEGORIES, TYPES, getSubcategories, CATEGORY_COLORS } from '../../constants/categories';
+import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType, PaymentTypeItem, Target, TaxonomyOverrideDoc } from '../../types';
+import {
+  TYPES,
+  getEffectiveCategoriesForTarget,
+  getEffectiveSubcategoriesForTarget,
+  CATEGORY_COLORS,
+  getCategoryMeta,
+  getSubcategoryIcon
+} from '../../constants/categories';
 
 interface RecordFormModalProps {
   isOpen: boolean;
@@ -20,37 +26,9 @@ interface RecordFormModalProps {
   onMoveToExpense?: (record: EnrichedHomeRecord) => void;
   theme?: 'light' | 'dark';
   onToggleTheme?: () => void;
+  overrideDoc?: TaxonomyOverrideDoc;
+  onManageCategories?: () => void;
 }
-
-// Visual category icon map for quick selection
-const CATEGORY_ICONS: Partial<Record<MaintenanceCategory, React.ComponentType<{ className?: string }>>> = {
-  'HVAC': Thermometer,
-  'Plumbing': Droplets,
-  'Electrical': Zap,
-  'Utilities': Zap,
-  'Appliances': Sparkles,
-  'Landscaping & Lawn': Sparkles,
-  'General Repair': Wrench,
-  'Renovation': Wrench,
-  'Property Tax': Landmark,
-  'Mortgage': Building,
-  'Homeowners Insurance': ShieldCheck,
-  'Inspection': CheckCircle2,
-  'Flooring': Layers,
-  'Roofing': HomeIcon,
-};
-
-// Featured quick categories for 1-tap selection
-const FEATURED_CATEGORIES: MaintenanceCategory[] = [
-  'HVAC',
-  'Plumbing',
-  'Electrical',
-  'Utilities',
-  'Landscaping & Lawn',
-  'General Repair',
-  'Appliances',
-  'Property Tax'
-];
 
 export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   isOpen,
@@ -63,7 +41,9 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   onManagePaymentTypes,
   onMoveToExpense,
   theme: propsTheme,
-  onToggleTheme
+  onToggleTheme,
+  overrideDoc,
+  onManageCategories
 }) => {
   const costInputRef = useRef<HTMLInputElement>(null);
 
@@ -94,10 +74,12 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   }, [paymentTypes]);
 
   const [homeId, setHomeId] = useState(activeHomeId);
+  const selectedHome = useMemo(() => homes.find(h => h.id === homeId), [homes, homeId]);
+  const [target, setTarget] = useState<Target>('Property');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
   const [cost, setCost] = useState<number | ''>('');
-  const [category, setCategory] = useState<MaintenanceCategory>('HVAC');
+  const [category, setCategory] = useState<MaintenanceCategory>('Maintenance & Repairs');
   const [subcategory, setSubcategory] = useState('');
   const [type, setType] = useState<MaintenanceType>('Maintenance');
   const [provider, setProvider] = useState('');
@@ -133,15 +115,27 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  const effectiveCategories = useMemo(
+    () => getEffectiveCategoriesForTarget(target, overrideDoc),
+    [target, overrideDoc]
+  );
+
+  const subcategories = useMemo(
+    () => getEffectiveSubcategoriesForTarget(target, category, overrideDoc),
+    [target, category, overrideDoc]
+  );
+
   useEffect(() => {
     if (initialRecord) {
-      setHomeId(initialRecord.homeId);
+      const initialHome = homes.find(h => h.id === initialRecord.homeId);
+      setHomeId(initialRecord.homeId || activeHomeId || (homes[0]?.id || ''));
+      setTarget('Property');
       setDate(initialRecord.date);
       setTime(initialRecord.time || new Date().toTimeString().slice(0, 5));
       setCost(initialRecord.cost);
       setCategory(initialRecord.category);
       setSubcategory(
-        getSubcategories(initialRecord.category).includes(initialRecord.subcategory || '')
+        getEffectiveSubcategoriesForTarget('Property', initialRecord.category, overrideDoc).includes(initialRecord.subcategory || '')
           ? initialRecord.subcategory || ''
           : ''
       );
@@ -149,34 +143,48 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       setProvider(initialRecord.provider || '');
       setNotes(initialRecord.notes || '');
       setPaymentType(initialRecord.paymentType || 'Cash');
-      setIsTaxDeductible(Boolean(initialRecord.isTaxDeductible));
+      setIsTaxDeductible(initialRecord.isTaxDeductible !== undefined ? Boolean(initialRecord.isTaxDeductible) : Boolean(initialHome?.isIncomeProperty));
       setNextServiceDate(initialRecord.nextServiceDate || '');
       setAddNextReminder(Boolean(initialRecord.nextServiceDate));
     } else {
-      setHomeId(activeHomeId || (homes[0]?.id || ''));
+      const targetHomeId = activeHomeId || (homes[0]?.id || '');
+      const defaultHome = homes.find(h => h.id === targetHomeId);
+      setHomeId(targetHomeId);
+      setTarget('Property');
       setDate(new Date().toISOString().split('T')[0]);
       setTime(new Date().toTimeString().slice(0, 5));
       setCost('');
-      setCategory('HVAC');
+      const defaultCat = getEffectiveCategoriesForTarget('Property', overrideDoc)[0] || 'Maintenance & Repairs';
+      setCategory(defaultCat);
       setSubcategory('');
       setType('Maintenance');
       setProvider('');
       setNotes('');
       setPaymentType('Cash');
-      setIsTaxDeductible(false);
+      setIsTaxDeductible(Boolean(defaultHome?.isIncomeProperty) || defaultCat === 'Tax' || defaultCat === 'Property Tax');
       setNextServiceDate('');
       setAddNextReminder(false);
     }
-  }, [initialRecord, isOpen, activeHomeId, homes]);
+  }, [initialRecord, isOpen, activeHomeId, homes, overrideDoc]);
 
   if (!isOpen) return null;
 
-  const subcategories = getSubcategories(category);
+  const handleHomeChange = (newHomeId: string) => {
+    setHomeId(newHomeId);
+    const newHome = homes.find(h => h.id === newHomeId);
+    if (newHome?.isIncomeProperty) {
+      setIsTaxDeductible(true);
+    }
+  };
 
   const handleCategoryChange = (newCategory: MaintenanceCategory) => {
     setCategory(newCategory);
     setSubcategory('');
-    setIsTaxDeductible(newCategory === 'Property Tax');
+    setIsTaxDeductible(
+      Boolean(selectedHome?.isIncomeProperty) ||
+      newCategory === 'Tax' ||
+      newCategory === 'Property Tax'
+    );
   };
 
   const handleAddCost = (amountToAdd: number) => {
@@ -206,6 +214,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
     const recordData: Partial<EnrichedHomeRecord> = {
       id: initialRecord ? initialRecord.id : `rec-${Date.now()}`,
       homeId,
+      target,
       date,
       time,
       cost: Number(cost),
@@ -269,7 +278,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     <HomeIcon className={`w-3 h-3 mr-1 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
                     <select
                       value={homeId}
-                      onChange={(e) => setHomeId(e.target.value)}
+                      onChange={(e) => handleHomeChange(e.target.value)}
                       className={`text-[11px] font-semibold rounded-md py-0.5 pl-1.5 pr-4 border focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer ${
                         isDark 
                           ? 'bg-slate-800 text-slate-200 border-slate-700' 
@@ -443,31 +452,45 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                   Category <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
                 </label>
                 
-                {/* Category Dropdown */}
-                <div className="relative">
-                  <select
-                    value={category}
-                    onChange={(e) => handleCategoryChange(e.target.value as MaintenanceCategory)}
-                    className={`text-[11px] font-semibold rounded-md py-0.5 px-2 pr-5 border focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer appearance-none truncate max-w-[150px] ${
-                      isDark
-                        ? 'bg-slate-800 text-slate-200 border-slate-700'
-                        : 'bg-slate-100 text-slate-800 border-slate-200'
-                    }`}
-                  >
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <div className="flex items-center gap-2">
+                  {onManageCategories && (
+                    <button
+                      type="button"
+                      onClick={onManageCategories}
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors ${
+                        isDark ? 'bg-slate-800 text-blue-400 border-slate-700 hover:bg-slate-700' : 'bg-slate-100 text-blue-600 border-slate-200 hover:bg-slate-200'
+                      }`}
+                    >
+                      Manage
+                    </button>
+                  )}
+                  {/* Category Dropdown */}
+                  <div className="relative">
+                    <select
+                      value={category}
+                      onChange={(e) => handleCategoryChange(e.target.value as MaintenanceCategory)}
+                      className={`text-[11px] font-semibold rounded-md py-0.5 px-2 pr-5 border focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer appearance-none truncate max-w-[150px] ${
+                        isDark
+                          ? 'bg-slate-800 text-slate-200 border-slate-700'
+                          : 'bg-slate-100 text-slate-800 border-slate-200'
+                      }`}
+                    >
+                      {effectiveCategories.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 
-              {/* Visual Category Chips (Compact 4 Columns) */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
-                {FEATURED_CATEGORIES.map((catName) => {
+              {/* Visual Category Chips */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-36 overflow-y-auto pr-0.5">
+                {effectiveCategories.map((catName) => {
                   const isSelected = category === catName;
                   const catColor = CATEGORY_COLORS[catName] || (isDark ? '#34d399' : '#059669');
-                  const IconComp = CATEGORY_ICONS[catName] || Tag;
+                  const meta = getCategoryMeta(catName);
+                  const IconComp = meta.icon;
 
                   return (
                     <button
@@ -477,8 +500,8 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       className={`flex items-center gap-1.5 p-1.5 rounded-lg border text-left transition-all active:scale-98 touch-manipulation ${
                         isSelected
                           ? isDark
-                            ? 'bg-slate-800 text-white font-bold border-emerald-500/60 shadow-xs'
-                            : 'bg-emerald-600 text-white font-bold border-emerald-600 shadow-xs'
+                            ? 'bg-slate-800 text-white font-bold border-blue-500/60 shadow-xs'
+                            : 'bg-blue-600 text-white font-bold border-blue-600 shadow-xs'
                           : isDark
                             ? 'bg-slate-950/40 text-slate-400 font-medium border-slate-800 hover:bg-slate-800/50'
                             : 'bg-slate-50 text-slate-700 font-medium border-slate-200/80 hover:bg-slate-100'
@@ -515,27 +538,41 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       onClick={() => setSubcategory('')}
                       className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
                         subcategory === ''
-                          ? isDark ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold' : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold'
+                          ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 font-bold' : 'bg-blue-100 text-blue-800 border-blue-300 font-bold'
                           : isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-white text-slate-600 border-slate-200'
                       }`}
                     >
                       None
                     </button>
-                    {subcategories.map((sub) => (
-                      <button
-                        key={sub}
-                        type="button"
-                        onClick={() => setSubcategory(sub)}
-                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
-                          subcategory === sub
-                            ? isDark ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold' : 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold'
-                            : isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-white text-slate-600 border-slate-200'
-                        }`}
-                      >
-                        {sub}
-                      </button>
-                    ))}
+                    {subcategories.map((sub) => {
+                      const SubIcon = getSubcategoryIcon(sub);
+                      const isSubSelected = subcategory === sub;
+                      return (
+                        <button
+                          key={sub}
+                          type="button"
+                          onClick={() => setSubcategory(sub)}
+                          className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors ${
+                            isSubSelected
+                              ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 font-bold' : 'bg-blue-100 text-blue-800 border-blue-300 font-bold'
+                              : isDark ? 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200' : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
+                          }`}
+                        >
+                          <SubIcon className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span>{sub}</span>
+                        </button>
+                      );
+                    })}
                   </div>
+                  {/* Tax Guidance note */}
+                  {getCategoryMeta(category).taxGuidance && (
+                    <div className={`mt-2 p-1.5 rounded-md text-[10px] flex items-start gap-1.5 border ${
+                      isDark ? 'bg-blue-950/30 border-blue-800/40 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-800'
+                    }`}>
+                      <Landmark className="w-3 h-3 text-blue-500 shrink-0 mt-0.5" />
+                      <span>{getCategoryMeta(category).taxGuidance}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -779,7 +816,14 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Tax Deductible</span>
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Tax Deductible</span>
+                      {selectedHome?.isIncomeProperty && (
+                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">
+                          Rental
+                        </span>
+                      )}
+                    </div>
                     <input
                       type="checkbox"
                       checked={isTaxDeductible}
@@ -790,7 +834,11 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
-                  <p className={`text-[9px] truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Flag for tax reporting</p>
+                  <p className={`text-[9px] truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {selectedHome?.isIncomeProperty
+                      ? 'Auto-flagged (Income Property — Sched. E)'
+                      : 'Flag for tax deduction / reporting'}
+                  </p>
                 </div>
               </div>
 

@@ -1,13 +1,44 @@
-import type { Home, HomeRecord, HomeReminder, Transaction, EnrichedHomeRecord, FirebaseConfig, PaymentTypeItem } from '../types';
+import type { Home, HomeRecord, HomeReminder, Transaction, EnrichedHomeRecord, FirebaseConfig, PaymentTypeItem, TaxonomyOverride, TaxonomyOverrideDoc } from '../types';
 
 const HOMES_KEY = 'hometrack_homes_v1';
 const RECORDS_KEY = 'hometrack_records_v1';
 const TRANSACTIONS_KEY = 'hometrack_transactions_v1';
 const REMINDERS_KEY = 'hometrack_reminders_v1';
 const PAYMENT_TYPES_KEY = 'hometrack_payment_types_v1';
+const TAXONOMY_OVERRIDE_KEY = 'hometrack_taxonomy_override_v1';
 const ACTIVE_HOME_KEY = 'hometrack_active_home_id';
 const FIREBASE_CONFIG_KEY = 'hometrack_firebase_config_custom';
 const FAMILY_CODE_KEY = 'hometrack_family_code';
+
+export const loadLocalTaxonomyOverrideDoc = (): TaxonomyOverrideDoc => {
+  try {
+    const raw = localStorage.getItem(TAXONOMY_OVERRIDE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('Failed to load local taxonomy override doc:', err);
+    return {};
+  }
+};
+
+export const saveLocalTaxonomyOverrideDoc = (doc: TaxonomyOverrideDoc): void => {
+  try {
+    localStorage.setItem(TAXONOMY_OVERRIDE_KEY, JSON.stringify(doc));
+  } catch (err) {
+    console.error('Failed to save local taxonomy override doc:', err);
+  }
+};
+
+export const loadLocalTaxonomyOverride = (target: string = 'Property'): TaxonomyOverride => {
+  const doc = loadLocalTaxonomyOverrideDoc();
+  return doc[target] || { categories: {}, deleted: [] };
+};
+
+export const saveLocalTaxonomyOverride = (override: TaxonomyOverride, target: string = 'Property'): void => {
+  const doc = loadLocalTaxonomyOverrideDoc();
+  doc[target] = override;
+  saveLocalTaxonomyOverrideDoc(doc);
+};
 
 export const INITIAL_PAYMENT_TYPES: PaymentTypeItem[] = [
   { id: 'pt-1', name: 'Cash', isSystemDefault: true, isDefault: true },

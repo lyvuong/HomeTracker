@@ -8,6 +8,7 @@ import { CostAnalytics } from './components/Analytics/CostAnalytics';
 import { ReminderManager } from './components/Reminders/ReminderManager';
 import { SettingsModal } from './components/Settings/SettingsModal';
 import { PaymentTypesModal } from './components/Settings/PaymentTypesModal';
+import { CategoryTaxonomyModal } from './components/Settings/CategoryTaxonomyModal';
 import { AboutPage } from './components/About/AboutPage';
 import { RecordFormModal } from './components/Records/RecordFormModal';
 import { HouseModal } from './components/Homes/HouseModal';
@@ -15,8 +16,9 @@ import { ReminderModal } from './components/Reminders/ReminderModal';
 import { PWAInstallPrompt } from './components/PWA/PWAInstallPrompt';
 import { LoginScreen } from './components/Auth/LoginScreen';
 
-import type { Home, HomeRecord, HomeReminder, Transaction, EnrichedHomeRecord, UserProfile, ActiveTab, PaymentTypeItem } from './types';
+import type { Home, HomeRecord, HomeReminder, Transaction, EnrichedHomeRecord, UserProfile, ActiveTab, PaymentTypeItem, TaxonomyOverride, TaxonomyOverrideDoc } from './types';
 import { buildTransactionCategory } from './utils/homeRecords';
+import { getEffectiveCategories } from './constants/categories';
 import {
   loadLocalHomes,
   saveLocalHomes,
@@ -28,6 +30,8 @@ import {
   saveLocalReminders,
   loadLocalPaymentTypes,
   saveLocalPaymentTypes,
+  loadLocalTaxonomyOverrideDoc,
+  saveLocalTaxonomyOverrideDoc,
   INITIAL_PAYMENT_TYPES,
   clearDemoData,
   restoreSampleData,
@@ -59,6 +63,8 @@ import {
   subscribeFirestorePaymentTypes,
   saveFirestorePaymentType,
   verifyOrCreateHousehold,
+  subscribeTaxonomyOverride,
+  saveTaxonomyOverride,
   subscribeRTDBHomes,
   subscribeRTDBRecords,
   subscribeRTDBReminders,
@@ -77,6 +83,7 @@ export const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>(() => loadLocalTransactions());
   const [reminders, setReminders] = useState<HomeReminder[]>(() => loadLocalReminders());
   const [paymentTypes, setPaymentTypes] = useState<PaymentTypeItem[]>(() => loadLocalPaymentTypes());
+  const [taxonomyOverrideDoc, setTaxonomyOverrideDoc] = useState<TaxonomyOverrideDoc>(() => loadLocalTaxonomyOverrideDoc());
   const [activeHomeId, setActiveHomeIdState] = useState<string>(() => getActiveHomeId());
   const [familyCode, setFamilyCodeState] = useState<string>(() => getStoredFamilyCode());
 
@@ -126,6 +133,18 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleSaveTaxonomyOverride = async (target: string, updated: TaxonomyOverride) => {
+    const nextDoc: TaxonomyOverrideDoc = {
+      ...taxonomyOverrideDoc,
+      [target]: updated
+    };
+    setTaxonomyOverrideDoc(nextDoc);
+    saveLocalTaxonomyOverrideDoc(nextDoc);
+    if (user && isFirebaseActive) {
+      await saveTaxonomyOverride(user.uid, familyCode, target, updated);
+    }
+  };
+
   // Modals state
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<EnrichedHomeRecord | null>(null);
@@ -136,6 +155,7 @@ export const App: React.FC = () => {
   const [editingReminder, setEditingReminder] = useState<HomeReminder | null>(null);
 
   const [isPaymentTypesModalOpen, setIsPaymentTypesModalOpen] = useState(false);
+  const [isTaxonomyModalOpen, setIsTaxonomyModalOpen] = useState(false);
 
   // Online / Offline Detection
   useEffect(() => {
@@ -323,6 +343,11 @@ export const App: React.FC = () => {
             }
           });
 
+          const unSubTaxonomyFS = subscribeTaxonomyOverride(userProfile.uid, familyCode, (cloudTaxonomyDoc) => {
+            setTaxonomyOverrideDoc(cloudTaxonomyDoc);
+            saveLocalTaxonomyOverrideDoc(cloudTaxonomyDoc);
+          });
+
           return () => {
             unSubHomesFS();
             unSubHomesRTDB();
@@ -332,6 +357,7 @@ export const App: React.FC = () => {
             unSubRemindersFS();
             unSubRemindersRTDB();
             unSubPaymentTypesFS();
+            unSubTaxonomyFS();
           };
         } else {
           tryAutoSignInGoogle().catch(() => {});
@@ -517,10 +543,12 @@ export const App: React.FC = () => {
 
     const category = recordData.category || 'General Repair';
     const subcategory = recordData.subcategory || undefined;
+    const recTarget = recordData.target || 'Property';
 
     const newRecord: HomeRecord = {
       id: recordId,
       homeId: targetHomeId,
+      target: recTarget,
       category,
       subcategory,
       type: recordData.type || 'Maintenance',
@@ -537,7 +565,7 @@ export const App: React.FC = () => {
       amount: Number(recordData.cost) || 0,
       vendor: recordData.provider || 'DIY',
       notes: recordData.notes || '',
-      category: buildTransactionCategory(category, home, subcategory),
+      category: buildTransactionCategory(category, home, subcategory, recTarget),
       paymentType: recordData.paymentType || 'Cash',
       user: auditInfo?.displayName || 'Home Owner',
       isTaxDeductible: recordData.isTaxDeductible ?? false
@@ -802,6 +830,7 @@ export const App: React.FC = () => {
               setIsServiceModalOpen(true);
             }}
             onDeleteRecord={handleDeleteRecord}
+            overrideDoc={taxonomyOverrideDoc}
           />
         )}
 
@@ -836,6 +865,8 @@ export const App: React.FC = () => {
             onRestoreSampleData={handleRestoreSampleData}
             paymentTypesCount={paymentTypes.length}
             onManagePaymentTypes={() => setIsPaymentTypesModalOpen(true)}
+            categoriesCount={getEffectiveCategories(taxonomyOverrideDoc).length}
+            onManageCategories={() => setIsTaxonomyModalOpen(true)}
           />
         )}
 
@@ -860,6 +891,8 @@ export const App: React.FC = () => {
         onMoveToExpense={handleMoveRecordToExpense}
         theme={theme}
         onToggleTheme={toggleTheme}
+        overrideDoc={taxonomyOverrideDoc}
+        onManageCategories={() => setIsTaxonomyModalOpen(true)}
       />
 
       <HouseModal
@@ -875,12 +908,21 @@ export const App: React.FC = () => {
         homes={homes}
         activeHomeId={activeHomeId}
         initialReminder={editingReminder}
+        overrideDoc={taxonomyOverrideDoc}
       />
 
       <PaymentTypesModal
         isOpen={isPaymentTypesModalOpen}
         onClose={() => setIsPaymentTypesModalOpen(false)}
         paymentTypes={paymentTypes}
+      />
+
+      <CategoryTaxonomyModal
+        isOpen={isTaxonomyModalOpen}
+        onClose={() => setIsTaxonomyModalOpen(false)}
+        overrideDoc={taxonomyOverrideDoc}
+        onSaveOverride={handleSaveTaxonomyOverride}
+        familyCode={familyCode}
       />
 
       {/* Bottom Navigation Bar */}

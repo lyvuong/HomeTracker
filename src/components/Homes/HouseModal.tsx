@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Home as HomeIcon, Save } from 'lucide-react';
+import { X, Home as HomeIcon, Save, Landmark, Check } from 'lucide-react';
 import type { Home, PropertyType } from '../../types';
 
 interface HouseModalProps {
@@ -18,6 +18,7 @@ export const HouseModal: React.FC<HouseModalProps> = ({
   const [nickname, setNickname] = useState('');
   const [address, setAddress] = useState('');
   const [propertyType, setPropertyType] = useState<PropertyType>('Single Family');
+  const [isIncomeProperty, setIsIncomeProperty] = useState(false);
   const [yearBuilt, setYearBuilt] = useState<number | ''>('');
   const [squareFootage, setSquareFootage] = useState<number | ''>('');
   const [purchaseDate, setPurchaseDate] = useState('');
@@ -27,8 +28,9 @@ export const HouseModal: React.FC<HouseModalProps> = ({
   useEffect(() => {
     if (initialHome) {
       setNickname(initialHome.nickname);
-      setAddress(initialHome.address);
+      setAddress(initialHome.address || '');
       setPropertyType(initialHome.propertyType);
+      setIsIncomeProperty(Boolean(initialHome.isIncomeProperty));
       setYearBuilt(initialHome.yearBuilt || '');
       setSquareFootage(initialHome.squareFootage || '');
       setPurchaseDate(initialHome.purchaseDate || '');
@@ -38,6 +40,7 @@ export const HouseModal: React.FC<HouseModalProps> = ({
       setNickname('');
       setAddress('');
       setPropertyType('Single Family');
+      setIsIncomeProperty(false);
       setYearBuilt('');
       setSquareFootage('');
       setPurchaseDate('');
@@ -50,13 +53,14 @@ export const HouseModal: React.FC<HouseModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nickname.trim() || !address.trim()) return;
+    if (!nickname.trim()) return;
 
     onSave({
       id: initialHome ? initialHome.id : `h-${Date.now()}`,
       nickname: nickname.trim(),
-      address: address.trim(),
+      address: address.trim() || undefined,
       propertyType,
+      isIncomeProperty,
       yearBuilt: yearBuilt !== '' ? Number(yearBuilt) : undefined,
       squareFootage: squareFootage !== '' ? Number(squareFootage) : undefined,
       purchaseDate: purchaseDate || undefined,
@@ -104,10 +108,11 @@ export const HouseModal: React.FC<HouseModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Address *</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Address <span className="text-slate-500 font-normal">(optional)</span>
+            </label>
             <input
               type="text"
-              required
               placeholder="123 Maple Street, Springfield"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
@@ -150,6 +155,51 @@ export const HouseModal: React.FC<HouseModalProps> = ({
                 onChange={(e) => setSquareFootage(e.target.value === '' ? '' : Number(e.target.value))}
                 className="w-full glass-input text-white text-sm rounded-xl p-2.5"
               />
+            </div>
+          </div>
+
+          {/* Income Property / Rental Toggle Card */}
+          <div
+            onClick={() => setIsIncomeProperty(!isIncomeProperty)}
+            className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
+              isIncomeProperty
+                ? 'bg-emerald-950/40 border-emerald-500/50 shadow-md shadow-emerald-950/50'
+                : 'bg-slate-800/40 border-slate-700/60 hover:bg-slate-800/70'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div className={`p-2 rounded-xl border mt-0.5 shrink-0 ${
+                isIncomeProperty
+                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                  : 'bg-slate-700/50 text-slate-400 border-slate-600/50'
+              }`}>
+                <Landmark className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold ${
+                    isIncomeProperty ? 'text-emerald-300' : 'text-slate-200'
+                  }`}>
+                    Income Property (Rental / Investment)
+                  </span>
+                  {isIncomeProperty && (
+                    <span className="text-[10px] uppercase font-bold px-2 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      Rental
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-400 leading-snug">
+                  Property is rented or held for investment — expenses linked to this property will automatically default to tax-deductible (Schedule E).
+                </p>
+              </div>
+            </div>
+
+            <div className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 mt-1 transition-all ${
+              isIncomeProperty
+                ? 'bg-emerald-500 border-emerald-400 text-slate-950'
+                : 'border-slate-600 bg-slate-800'
+            }`}>
+              {isIncomeProperty && <Check className="w-3.5 h-3.5 stroke-[3]" />}
             </div>
           </div>
 

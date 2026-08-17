@@ -17,8 +17,9 @@ export interface HouseholdMetadata {
 export interface Home {
   id: string;
   nickname: string;
-  address: string;
+  address?: string;
   propertyType: PropertyType;
+  isIncomeProperty?: boolean; // Rental/investment property — expenses default to tax-deductible (Schedule E)
   yearBuilt?: number;
   squareFootage?: number;
   purchaseDate?: string;
@@ -30,36 +31,40 @@ export interface Home {
   lastEditedBy?: UserAuditInfo;
 }
 
-export type MaintenanceCategory =
-  | 'HVAC'
-  | 'Plumbing'
-  | 'Electrical'
-  | 'Roofing'
-  | 'Appliances'
-  | 'Landscaping & Lawn'
-  | 'Pest Control'
-  | 'Painting'
-  | 'Flooring'
-  | 'Windows & Doors'
-  | 'Foundation & Structural'
-  | 'Renovation'
-  | 'Inspection'
+export const TARGETS = ['Property'] as const;
+export type Target = typeof TARGETS[number];
+
+export type StandardPropertyCategory =
+  | 'Mortgage & Rent'
+  | 'Tax'
   | 'Utilities'
-  | 'General Repair'
-  | 'Property Tax'
-  | 'Mortgage'
-  | 'Homeowners Insurance'
-  | 'HOA Fees'
-  | 'Home Warranty'
+  | 'Insurance'
+  | 'Maintenance & Repairs'
+  | 'Improvements & Renovations'
+  | 'Furnishings & Appliances'
+  | 'Services'
+  | 'Solar'
   | 'Other';
 
 /**
- * Optional second level under a category — currently only Utilities has one,
- * so a recurring bill can say which utility it was. Written into the shared
- * ledger by concatenating it onto the category string with a hyphen the way
- * CarTracker appends the vehicle: "Home - Utilities - Electricity - Main House".
+ * MaintenanceCategory supports standard categories as well as
+ * custom user-defined categories and legacy record categories for full backward compatibility.
+ */
+export type MaintenanceCategory = StandardPropertyCategory | (string & {});
+
+/**
+ * Second level under a category (e.g. "Electricity", "Plumbing", "Property Tax").
  */
 export type MaintenanceSubcategory = string;
+
+export interface TaxonomyOverride {
+  /** Custom category → subcategory additions/overrides */
+  categories: Record<string, string[]>;
+  /** Soft-deleted keys: category names or "category::subcategory" pairs */
+  deleted: string[];
+}
+
+export type TaxonomyOverrideDoc = Partial<Record<string, TaxonomyOverride>>;
 
 export type MaintenanceType = 'Maintenance' | 'Repair' | 'Upgrade' | 'Inspection' | 'Expense';
 
@@ -96,6 +101,7 @@ export interface Transaction {
 export interface HomeRecord {
   id: string;
   homeId: string;
+  target?: Target | string;
   category: MaintenanceCategory;
   subcategory?: MaintenanceSubcategory; // omitted when the category offers none
   type: MaintenanceType;
@@ -121,6 +127,7 @@ export interface EnrichedHomeRecord extends HomeRecord {
 export interface HomeReminder {
   id: string;
   homeId: string;
+  target?: Target | string;
   title: string;
   category: MaintenanceCategory;
   dueDate?: string;

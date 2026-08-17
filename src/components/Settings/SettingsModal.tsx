@@ -14,7 +14,8 @@ import {
   Unlock,
   ShieldAlert,
   CreditCard,
-  ChevronRight
+  ChevronRight,
+  Layers
 } from 'lucide-react';
 import type { FirebaseConfig, UserProfile } from '../../types';
 import {
@@ -43,6 +44,8 @@ interface SettingsModalProps {
   onRestoreSampleData: () => void;
   paymentTypesCount?: number;
   onManagePaymentTypes?: () => void;
+  categoriesCount?: number;
+  onManageCategories?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -54,7 +57,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClearDemoData,
   onRestoreSampleData,
   paymentTypesCount = 0,
-  onManagePaymentTypes
+  onManagePaymentTypes,
+  categoriesCount = 9,
+  onManageCategories
 }) => {
   const [inputFamilyCode, setInputFamilyCode] = useState(familyCode || '');
   const [familyStatusMsg, setFamilyStatusMsg] = useState('');
@@ -290,6 +295,48 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/20"
             >
               Info
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Categories & Subcategories Section */}
+      <div className="glass-panel p-6 rounded-3xl space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers className="w-5 h-5 text-blue-400" />
+            <h2 className="text-lg font-bold text-white">Categories & Subcategories</h2>
+          </div>
+          {onManageCategories && (
+            <button
+              onClick={onManageCategories}
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-950/60 border border-blue-800/80 px-3 py-1.5 rounded-xl transition-all"
+            >
+              Manage Taxonomy <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Configure the 2-level hierarchical taxonomy (Mortgage & Rent, Tax, Utilities, Insurance, Maintenance & Repairs, Renovations, etc.). Custom additions and overrides sync directly with Statements PWA.
+        </p>
+
+        <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-950/80 text-blue-400 border border-blue-800/60 flex items-center justify-center font-bold">
+              <Layers className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-white block">Property Taxonomy</span>
+              <span className="text-xs text-slate-400">{categoriesCount} active categories & subcategories</span>
+            </div>
+          </div>
+          {onManageCategories && (
+            <button
+              onClick={onManageCategories}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20"
+            >
+              Customize
             </button>
           )}
         </div>

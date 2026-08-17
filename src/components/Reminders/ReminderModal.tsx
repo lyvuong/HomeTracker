@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Save, Bell } from 'lucide-react';
-import type { Home, HomeReminder, MaintenanceCategory } from '../../types';
-import { CATEGORIES } from '../../constants/categories';
+import type { Home, HomeReminder, MaintenanceCategory, Target, TaxonomyOverrideDoc } from '../../types';
+import { getEffectiveCategoriesForTarget } from '../../constants/categories';
 
 interface ReminderModalProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface ReminderModalProps {
   homes: Home[];
   activeHomeId: string;
   initialReminder?: HomeReminder | null;
+  overrideDoc?: TaxonomyOverrideDoc;
 }
 
 export const ReminderModal: React.FC<ReminderModalProps> = ({
@@ -18,14 +19,21 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
   onSave,
   homes,
   activeHomeId,
-  initialReminder
+  initialReminder,
+  overrideDoc
 }) => {
   const [homeId, setHomeId] = useState(activeHomeId);
+  const [target] = useState<Target>('Property');
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<MaintenanceCategory>('HVAC');
+  const [category, setCategory] = useState<MaintenanceCategory>('Maintenance & Repairs');
   const [dueDate, setDueDate] = useState('');
   const [intervalMonths, setIntervalMonths] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
+
+  const effectiveCategories = useMemo(
+    () => getEffectiveCategoriesForTarget('Property', overrideDoc),
+    [overrideDoc]
+  );
 
   useEffect(() => {
     if (initialReminder) {
@@ -37,13 +45,13 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
       setNotes(initialReminder.notes || '');
     } else {
       setHomeId(activeHomeId || (homes[0]?.id || ''));
-      setTitle('Replace HVAC Filter');
-      setCategory('HVAC');
+      setTitle('Seasonal Maintenance Inspection');
+      setCategory(getEffectiveCategoriesForTarget('Property', overrideDoc)[0] || 'Maintenance & Repairs');
       setDueDate('');
       setIntervalMonths('');
       setNotes('');
     }
-  }, [initialReminder, isOpen, activeHomeId, homes]);
+  }, [initialReminder, isOpen, activeHomeId, homes, overrideDoc]);
 
   if (!isOpen) return null;
 
@@ -54,6 +62,7 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
     onSave({
       id: initialReminder ? initialReminder.id : `rem-${Date.now()}`,
       homeId,
+      target,
       title: title.trim(),
       category,
       dueDate: dueDate || undefined,
@@ -123,7 +132,7 @@ export const ReminderModal: React.FC<ReminderModalProps> = ({
               onChange={(e) => setCategory(e.target.value as MaintenanceCategory)}
               className="w-full glass-input text-white text-sm rounded-xl p-2.5 bg-slate-900"
             >
-              {CATEGORIES.map(cat => (
+              {effectiveCategories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>

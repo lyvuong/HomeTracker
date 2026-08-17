@@ -11,6 +11,8 @@ import type { MaintenanceCategory, MaintenanceSubcategory, Home } from '../types
 export const buildTransactionCategory = (
   category: MaintenanceCategory,
   home: Home,
-  subcategory?: MaintenanceSubcategory
+  subcategory?: MaintenanceSubcategory,
+  target?: string
 ): string =>
-  ['Home', category, subcategory?.trim(), home.nickname].filter(Boolean).join(' - ');
+  [target || 'Home', category, subcategory?.trim(), home.nickname].filter(Boolean).join(' - ');
+

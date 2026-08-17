@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home as HomeIcon, Plus, Edit2, Trash2, CheckCircle2, Ruler, Users, Key, Building2, Building, Hotel, Warehouse } from 'lucide-react';
+import { Home as HomeIcon, Plus, Edit2, Trash2, CheckCircle2, Ruler, Users, Key, Building2, Building, Hotel, Warehouse, Landmark } from 'lucide-react';
 import type { Home, PropertyType } from '../../types';
 import { HouseModal } from './HouseModal';
 
@@ -179,10 +179,16 @@ export const HouseGarage: React.FC<HouseGarageProps> = ({
                     className="cursor-pointer group/title"
                     title={isActive ? 'Active Home' : `Click to set ${h.nickname} as active home`}
                   >
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
                       <span className="bg-slate-800 text-slate-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-700">
                         {h.propertyType}
                       </span>
+                      {h.isIncomeProperty && (
+                        <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <Landmark className="w-3 h-3 text-emerald-400" />
+                          Rental
+                        </span>
+                      )}
                       {h.yearBuilt && (
                         <span className="text-xs text-slate-400 font-semibold">Built {h.yearBuilt}</span>
                       )}
@@ -190,7 +196,7 @@ export const HouseGarage: React.FC<HouseGarageProps> = ({
                     <h3 className="text-xl font-extrabold text-white tracking-tight group-hover/title:text-emerald-400 transition-colors">
                       {h.nickname}
                     </h3>
-                    <p className="text-[11px] text-slate-400 mt-1">{h.address}</p>
+                    {h.address && <p className="text-[11px] text-slate-400 mt-1">{h.address}</p>}
                   </div>
 
                   {/* Stats */}

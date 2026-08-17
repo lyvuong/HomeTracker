@@ -9,9 +9,15 @@ import {
   Trash2,
   Landmark
 } from 'lucide-react';
-import type { Home, EnrichedHomeRecord, MaintenanceCategory } from '../../types';
+import type { Home, EnrichedHomeRecord, Target, TaxonomyOverrideDoc } from '../../types';
 import { exportRecordsAsCSV } from '../../services/storage';
-import { CATEGORIES, TYPES, getSubcategories } from '../../constants/categories';
+import {
+  TYPES,
+  getEffectiveCategoriesForTarget,
+  getEffectiveSubcategoriesForTarget,
+  TARGET_META,
+  COLOR_STYLES
+} from '../../constants/categories';
 
 interface RecordHistoryProps {
   records: EnrichedHomeRecord[];
@@ -20,6 +26,7 @@ interface RecordHistoryProps {
   onOpenAddService: () => void;
   onEditRecord: (record: EnrichedHomeRecord) => void;
   onDeleteRecord: (id: string) => void;
+  overrideDoc?: TaxonomyOverrideDoc;
 }
 
 export const RecordHistory: React.FC<RecordHistoryProps> = ({
@@ -28,7 +35,8 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
   activeHomeId,
   onOpenAddService,
   onEditRecord,
-  onDeleteRecord
+  onDeleteRecord,
+  overrideDoc
 }) => {
   const [selectedHomeFilter, setSelectedHomeFilter] = useState<string>(activeHomeId || 'all');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
@@ -42,12 +50,19 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
     return new Map(homes.map(h => [h.id, h]));
   }, [homes]);
 
+  // Combine effective Property categories with any distinct categories in records
+  const filterCategories = useMemo(() => {
+    const effective = getEffectiveCategoriesForTarget('Property', overrideDoc);
+    const fromRecords = Array.from(new Set(records.map(r => r.category))).filter(Boolean);
+    return Array.from(new Set([...effective, ...fromRecords]));
+  }, [overrideDoc, records]);
+
   // Subcategories are per-category, so this only appears once a category
   // that defines them is selected.
-  const availableSubcategories = useMemo(
-    () => (selectedCategoryFilter === 'all' ? [] : getSubcategories(selectedCategoryFilter as MaintenanceCategory)),
-    [selectedCategoryFilter]
-  );
+  const availableSubcategories = useMemo(() => {
+    if (selectedCategoryFilter === 'all') return [];
+    return getEffectiveSubcategoriesForTarget('Property', selectedCategoryFilter, overrideDoc);
+  }, [selectedCategoryFilter, overrideDoc]);
 
   const handleCategoryFilterChange = (value: string) => {
     setSelectedCategoryFilter(value);
@@ -70,7 +85,16 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
         const matchSubcategory = (r.subcategory || '').toLowerCase().includes(query);
         const matchProvider = (r.provider || '').toLowerCase().includes(query);
         const matchNotes = (r.notes || '').toLowerCase().includes(query);
-        return matchCategory || matchSubcategory || matchProvider || matchNotes || homeName.includes(query);
+        const matchCost = r.cost.toString().includes(query);
+
+        return (
+          homeName.includes(query) ||
+          matchCategory ||
+          matchSubcategory ||
+          matchProvider ||
+          matchNotes ||
+          matchCost
+        );
       }
 
       return true;
@@ -173,7 +197,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
           >
             <option value="all">📋 All Categories</option>
-            {CATEGORIES.map(cat => (
+            {filterCategories.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
@@ -241,6 +265,10 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
         <div className="space-y-3">
           {filteredRecords.map((record) => {
             const home = homeMap.get(record.homeId);
+            const recTarget = (record.target || 'Property') as Target;
+            const targetMeta = TARGET_META[recTarget] || TARGET_META['Property'];
+            const targetStyles = COLOR_STYLES[targetMeta.color];
+            const TargetIcon = targetMeta.icon;
 
             return (
               <div
@@ -255,6 +283,12 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
 
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
+                      {record.target && record.target !== 'Property' && (
+                        <span className={`flex items-center gap-1 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${targetStyles.bg} ${targetStyles.border} ${targetStyles.text}`}>
+                          <TargetIcon className="w-3 h-3" />
+                          <span>{record.target}</span>
+                        </span>
+                      )}
                       <h3 className="font-bold text-base text-white">
                         {record.category}
                         {record.subcategory && (

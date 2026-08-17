@@ -25,7 +25,7 @@ import {
 import type { Firestore } from 'firebase/firestore';
 import { getDatabase, ref, set, remove, onValue } from 'firebase/database';
 import type { Database } from 'firebase/database';
-import type { FirebaseConfig, Home, HomeRecord, HomeReminder, Transaction, UserProfile, UserAuditInfo, PaymentTypeItem } from '../types';
+import type { FirebaseConfig, Home, HomeRecord, HomeReminder, Transaction, UserProfile, UserAuditInfo, PaymentTypeItem, TaxonomyOverride, TaxonomyOverrideDoc } from '../types';
 import { getStoredFirebaseConfig, setStoredFirebaseConfig, getStoredFamilyCode, setStoredFamilyCode } from './storage';
 
 let app: FirebaseApp | null = null;
@@ -615,3 +615,46 @@ export const saveFirestorePaymentType = async (
     console.error('[Firestore] Error saving payment type:', err);
   }
 };
+
+// ==========================================
+// Taxonomy Overrides (Property Categories & Subcategories)
+// Syncs to households/{familyCode}/settings/taxonomy
+// ==========================================
+
+export const subscribeTaxonomyOverride = (
+  userId: string,
+  familyCode: string | undefined,
+  callback: (data: TaxonomyOverrideDoc) => void
+) => {
+  if (!db) {
+    callback({});
+    return () => {};
+  }
+  const target = getStorageTarget(userId, familyCode);
+  const refDoc = doc(db, target.root, target.id, 'settings', 'taxonomy');
+  return onSnapshot(refDoc, (snap) => {
+    callback(snap.exists() ? (snap.data() as TaxonomyOverrideDoc) : {});
+  }, (err) => {
+    console.warn('[Firestore] Taxonomy override sync error:', err);
+    callback({});
+  });
+};
+
+export const saveTaxonomyOverride = async (
+  userId: string,
+  familyCode: string | undefined,
+  targetName: string,
+  override: TaxonomyOverride
+): Promise<void> => {
+  if (!db) return;
+  try {
+    const target = getStorageTarget(userId, familyCode);
+    const refDoc = doc(db, target.root, target.id, 'settings', 'taxonomy');
+    const cleanOverride = JSON.parse(JSON.stringify(override));
+    await setDoc(refDoc, { [targetName]: cleanOverride }, { merge: true });
+    console.log(`[Firestore] Taxonomy override saved to ${target.root}/${target.id}:`, targetName);
+  } catch (err) {
+    console.error('[Firestore] Error saving taxonomy override:', err);
+  }
+};
+

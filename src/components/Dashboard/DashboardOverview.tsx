@@ -10,7 +10,8 @@ import {
   ShieldCheck,
   Home,
   Tag,
-  Ruler
+  Ruler,
+  Landmark
 } from 'lucide-react';
 import type { Home as HomeType, EnrichedHomeRecord, HomeReminder } from '../../types';
 
@@ -93,6 +94,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
                   {activeHome.propertyType}
                 </span>
+                {activeHome.isIncomeProperty && (
+                  <span className="bg-emerald-400 text-slate-950 font-extrabold text-[11px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                    <Landmark className="w-3 h-3" />
+                    Income Property (Rental)
+                  </span>
+                )}
                 {activeHome.yearBuilt && (
                   <span className="bg-slate-800/90 text-slate-200 border border-slate-700 text-[11px] font-mono px-2 py-0.5 rounded-md font-semibold">
                     Built {activeHome.yearBuilt}
@@ -102,9 +109,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <h1 className="text-xl sm:text-3xl font-extrabold !text-white tracking-tight leading-tight truncate">
                 {activeHome.nickname}
               </h1>
-              <p className="text-xs text-slate-300 mt-0.5 truncate flex items-center gap-1">
-                <span>{activeHome.address}</span>
-              </p>
+              {activeHome.address && (
+                <p className="text-xs text-slate-300 mt-0.5 truncate flex items-center gap-1">
+                  <span>{activeHome.address}</span>
+                </p>
+              )}
             </div>
           </div>
 
