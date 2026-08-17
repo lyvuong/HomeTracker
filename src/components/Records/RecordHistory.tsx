@@ -138,10 +138,10 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
         <div>
           <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
             <Wrench className="w-6 h-6 text-emerald-500" />
-            Home Expense & Transaction History
+            Property Transaction & Maintenance History
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Complete logs of all maintenance, repairs, upgrades, property debits, and credits
+            Complete logs of all maintenance, repairs, upgrades, expenses, and credits
           </p>
         </div>
 
@@ -158,7 +158,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            Log Expense / Credit
+            Log Transaction
           </button>
         </div>
       </div>

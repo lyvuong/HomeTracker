@@ -114,10 +114,10 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
             <BarChart3 className="w-6 h-6 text-emerald-500" />
-            Cost & Maintenance Analytics
+            Financial & Maintenance Analytics
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Expense trends, credits, and category breakdown for {activeHome ? activeHome.nickname : 'All Homes'}
+            Cash flow trends, credits, expenses, and category breakdown for {activeHome ? activeHome.nickname : 'All Homes'}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -152,7 +152,7 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
 
       {filteredRecords.length === 0 ? (
         <div className="glass-panel p-12 text-center rounded-3xl text-slate-400 dark:text-slate-500 text-sm">
-          No expense records available to render analytics charts. Log maintenance first.
+          No transaction records available to render analytics charts. Log maintenance or expenses first.
         </div>
       ) : (
         <>
@@ -160,7 +160,7 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
           <div className="glass-panel p-6 rounded-3xl">
             <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-emerald-500" />
-              Monthly Maintenance Expense Trend ($)
+              Monthly Net Spending & Cash Flow Trend ($)
             </h2>
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -176,7 +176,7 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
                       color: chartColors.tooltipColor,
                       boxShadow: chartColors.tooltipShadow
                     }}
-                    formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Cost']}
+                    formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Net Amount']}
                   />
                   <Bar dataKey="cost" fill="#10b981" radius={[8, 8, 0, 0]} />
                 </BarChart>
@@ -191,7 +191,7 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
             <div className="glass-panel p-6 rounded-3xl">
               <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <PieIcon className="w-5 h-5 text-amber-500" />
-                Cost Breakdown by Category
+                Spending Breakdown by Category
               </h2>
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -217,7 +217,7 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
                         color: chartColors.tooltipColor,
                         boxShadow: chartColors.tooltipShadow
                       }}
-                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Spent']}
+                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Net Spent']}
                     />
                     <Legend
                       wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
@@ -232,7 +232,7 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
             <div className="glass-panel p-6 rounded-3xl">
               <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-emerald-500" />
-                Maintenance vs. Repair Distribution
+                Spending by Transaction & Work Type
               </h2>
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -257,7 +257,7 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
                         color: chartColors.tooltipColor,
                         boxShadow: chartColors.tooltipShadow
                       }}
-                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Spent']}
+                      formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Net Spent']}
                     />
                     <Legend
                       wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}

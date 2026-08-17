@@ -212,7 +212,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
                       className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5 active:scale-95"
                     >
                       <CheckCircle2 className="w-4 h-4" />
-                      Complete & Log Expense
+                      Complete & Log Transaction
                     </button>
                   </div>
 

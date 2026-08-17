@@ -242,7 +242,7 @@ export const HouseModal: React.FC<HouseModalProps> = ({
                 <p className={`text-[11px] leading-snug ${
                   isDark ? 'text-slate-400' : 'text-slate-600'
                 }`}>
-                  Property is rented or held for investment — expenses linked to this property will automatically default to tax-deductible (Schedule E).
+                  Property is rented or held for investment — expenses default to Schedule E deductions and credits track rental revenue.
                 </p>
               </div>
             </div>

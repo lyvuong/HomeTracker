@@ -309,7 +309,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
           >
             <PlusCircle className="w-4 h-4" />
-            Log Expense
+            Log Transaction
           </button>
 
           <button
@@ -345,7 +345,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             }`}
           >
             <TrendingUp className="w-4 h-4 text-indigo-500" />
-            Cost Analytics
+            Financial Analytics
           </button>
         </div>
       </div>
@@ -354,7 +354,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       <div className="glass-panel p-6 rounded-3xl">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Expense & Maintenance Logs</h2>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Transactions & Maintenance</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">Latest logged activity for {activeHome.nickname}</p>
           </div>
           <button
@@ -377,7 +377,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 onClick={onOpenAddService}
                 className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold text-xs"
               >
-                Log your first expense now
+                Log your first transaction now
               </button>
             </div>
           </div>

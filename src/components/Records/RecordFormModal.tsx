@@ -535,7 +535,11 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold leading-tight tracking-tight">
-                {initialRecord ? 'Edit Expense Record' : 'Log New Home Expense'}
+                {initialRecord 
+                  ? 'Edit Transaction Record' 
+                  : transactionType === 'Credit' 
+                    ? 'Log Property Credit / Inflow' 
+                    : 'Log Home Expense / Outflow'}
               </h2>
               <div className="flex items-center gap-2 mt-0.5">
                 {homes.length > 1 ? (
@@ -1331,7 +1335,13 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
               }`}
             >
               <Save className="w-3.5 h-3.5" />
-              <span>{initialRecord ? 'Save Changes' : 'Log Expense'}</span>
+              <span>
+                {initialRecord 
+                  ? 'Save Changes' 
+                  : transactionType === 'Credit' 
+                    ? 'Log Credit' 
+                    : 'Log Expense'}
+              </span>
             </button>
           </div>
 
