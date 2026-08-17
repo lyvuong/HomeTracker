@@ -328,7 +328,7 @@ export const setStoredFamilyCode = (code: string): void => {
 
 export const exportRecordsAsCSV = (records: EnrichedHomeRecord[], homes: Home[]): void => {
   const homeMap = new Map(homes.map(h => [h.id, h.nickname]));
-  const headers = ['Home', 'Date', 'Time', 'Category', 'Subcategory', 'Type', 'Cost ($)', 'Payment Type', 'Provider', 'Notes', 'Tax Deductible'];
+  const headers = ['Home', 'Date', 'Time', 'Category', 'Subcategory', 'Type', 'Transaction Type', 'Cost ($)', 'Payment Type', 'Provider', 'Notes', 'Tax Deductible'];
   const rows = records.map(r => [
     `"${homeMap.get(r.homeId) || 'Unknown Home'}"`,
     `"${r.date}"`,
@@ -336,6 +336,7 @@ export const exportRecordsAsCSV = (records: EnrichedHomeRecord[], homes: Home[])
     `"${r.category}"`,
     `"${r.subcategory || ''}"`,
     `"${r.type}"`,
+    `"${r.transactionType || 'Debit'}"`,
     r.cost.toFixed(2),
     `"${r.paymentType}"`,
     `"${(r.provider || '').replace(/"/g, '""')}"`,

@@ -79,6 +79,7 @@ export interface PaymentTypeItem {
 }
 
 export type PaymentType = string;
+export type TransactionType = 'Debit' | 'Credit';
 
 // Generic, app-agnostic ledger entry. Shared across any app on this Firebase
 // project (users/{uid}/transactions or households/{code}/transactions) —
@@ -96,6 +97,7 @@ export interface Transaction {
   paymentType: PaymentType;
   user: string;
   isTaxDeductible?: boolean;
+  transactionType?: TransactionType;
 }
 
 export interface HomeRecord {
@@ -122,6 +124,7 @@ export interface EnrichedHomeRecord extends HomeRecord {
   notes?: string;
   paymentType: PaymentType;
   isTaxDeductible?: boolean;
+  transactionType?: TransactionType;
 }
 
 export interface HomeReminder {

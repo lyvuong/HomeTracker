@@ -14,6 +14,252 @@ import {
   getSubcategoryIcon
 } from '../../constants/categories';
 
+interface TaxTreatmentAdvice {
+  propertyBadge: string;
+  propertyBadgeClass: string;
+  headline: string;
+  explanation: string;
+  scheduleBadge: string;
+  scheduleBadgeClass: string;
+  isDeductibleDefault: boolean;
+}
+
+const getTaxTreatmentAdvice = (
+  isIncomeProperty: boolean,
+  category: string,
+  type: MaintenanceType,
+  isDark: boolean,
+  transactionType: 'Debit' | 'Credit' = 'Debit'
+): TaxTreatmentAdvice => {
+  // Scenario 1: Credit / Inflow / Income / Reimbursement
+  if (transactionType === 'Credit') {
+    if (isIncomeProperty) {
+      if (category === 'Improvements & Renovations' || type === 'Upgrade') {
+        return {
+          propertyBadge: 'Rental Property',
+          propertyBadgeClass: isDark
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+            : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+          headline: 'Capital Rebate / Insurance Payout (Adjusts Depreciation Basis)',
+          explanation: 'Insurance payouts, contractor refunds, or vendor rebates for major capital renovations reduce the depreciable asset cost basis on Schedule E (Form 4562).',
+          scheduleBadge: 'Schedule E · Basis Offset',
+          scheduleBadgeClass: isDark
+            ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+            : 'bg-indigo-100 text-indigo-800 border-indigo-200',
+          isDeductibleDefault: false,
+        };
+      }
+
+      if (category === 'Tax' || category === 'Property Tax' || category === 'Mortgage & Rent' || category === 'Services' || category === 'Utilities') {
+        return {
+          propertyBadge: 'Rental Property',
+          propertyBadgeClass: isDark
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+            : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+          headline: 'Expense Refund / Rebate (Offsets Schedule E Deductions)',
+          explanation: 'Utility overcharge refunds, property tax abatements, or vendor discounts reduce your total deductible operating expenses on Schedule E in the year received.',
+          scheduleBadge: 'Schedule E · Expense Offset',
+          scheduleBadgeClass: isDark
+            ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+            : 'bg-amber-100 text-amber-800 border-amber-200',
+          isDeductibleDefault: false,
+        };
+      }
+
+      // Default Rental Credit -> Tenant Rent Income
+      return {
+        propertyBadge: 'Rental Property',
+        propertyBadgeClass: isDark
+          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+          : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        headline: 'Reportable Gross Rental Income (Schedule E, Line 3)',
+        explanation: 'Rent payments, tenant pet/parking fees, or late charges collected are reportable as gross rental income on IRS Schedule E (Line 3).',
+        scheduleBadge: 'Schedule E · Gross Revenue',
+        scheduleBadgeClass: isDark
+          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+          : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        isDeductibleDefault: false,
+      };
+    }
+
+    // Main Residence Credits
+    if (category === 'Solar') {
+      return {
+        propertyBadge: 'Main Residence',
+        propertyBadgeClass: isDark
+          ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+          : 'bg-blue-100 text-blue-800 border-blue-200',
+        headline: 'Clean Energy Rebate / Utility Incentive',
+        explanation: 'Manufacturer rebates or state utility incentives reduce your qualifying expenditure before computing the 30% clean energy tax credit on Form 5695.',
+        scheduleBadge: 'Form 5695 · Credit Offset',
+        scheduleBadgeClass: isDark
+          ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+          : 'bg-cyan-100 text-cyan-800 border-cyan-200',
+        isDeductibleDefault: false,
+      };
+    }
+
+    if (category === 'Improvements & Renovations' || type === 'Upgrade') {
+      return {
+        propertyBadge: 'Main Residence',
+        propertyBadgeClass: isDark
+          ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+          : 'bg-blue-100 text-blue-800 border-blue-200',
+        headline: 'Renovation Refund / Insurance Payout (Adjusts Cost Basis)',
+        explanation: 'Casualty insurance claim payouts or contractor overpayment refunds for renovations reduce the capital improvement additions to your home’s adjusted cost basis.',
+        scheduleBadge: 'Cost Basis Adjustment',
+        scheduleBadgeClass: isDark
+          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+          : 'bg-purple-100 text-purple-800 border-purple-200',
+        isDeductibleDefault: false,
+      };
+    }
+
+    if (category === 'Tax' || category === 'Property Tax') {
+      return {
+        propertyBadge: 'Main Residence',
+        propertyBadgeClass: isDark
+          ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+          : 'bg-blue-100 text-blue-800 border-blue-200',
+        headline: 'Property Tax Refund / Abatement (Schedule A Recovery)',
+        explanation: 'Real estate tax refunds from county reassessments or escrow surpluses offset prior deductions or reduce current tax expenses.',
+        scheduleBadge: 'Schedule A · Tax Recovery',
+        scheduleBadgeClass: isDark
+          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+          : 'bg-amber-100 text-amber-800 border-amber-200',
+        isDeductibleDefault: false,
+      };
+    }
+
+    return {
+      propertyBadge: 'Main Residence',
+      propertyBadgeClass: isDark
+        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+        : 'bg-blue-100 text-blue-800 border-blue-200',
+      headline: 'Expense Reimbursement / Rebate (Non-Taxable)',
+      explanation: 'Casualty insurance payouts, manufacturer warranty reimbursements, or contractor refunds are non-taxable inflows that offset your out-of-pocket home maintenance costs.',
+      scheduleBadge: 'Personal · Reimbursement',
+      scheduleBadgeClass: isDark
+        ? 'bg-slate-800 text-slate-400 border-slate-700'
+        : 'bg-slate-100 text-slate-600 border-slate-200',
+      isDeductibleDefault: false,
+    };
+  }
+
+  // Scenario 2: Debit / Outflow / Expense
+  if (isIncomeProperty) {
+    if (category === 'Improvements & Renovations' || type === 'Upgrade') {
+      return {
+        propertyBadge: 'Rental Property',
+        propertyBadgeClass: isDark
+          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+          : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        headline: 'Capital Improvement (Depreciated over 27.5 Years)',
+        explanation: 'Major renovations and structural replacements on rental properties add to your depreciation basis and are written off over 27.5 years on Schedule E (Form 4562).',
+        scheduleBadge: 'Schedule E · Depreciated',
+        scheduleBadgeClass: isDark
+          ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+          : 'bg-indigo-100 text-indigo-800 border-indigo-200',
+        isDeductibleDefault: true,
+      };
+    }
+
+    return {
+      propertyBadge: 'Rental Property',
+      propertyBadgeClass: isDark
+        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+        : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      headline: '100% Deductible Operating Expense',
+      explanation: 'Routine repairs, maintenance, property taxes, utilities, insurance, and management services on rental properties are fully deductible against rental income in the tax year paid.',
+      scheduleBadge: 'Schedule E · 100% Deductible',
+      scheduleBadgeClass: isDark
+        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+        : 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      isDeductibleDefault: true,
+    };
+  }
+
+  // Primary Residence / Personal Home
+  if (category === 'Tax' || category === 'Property Tax') {
+    return {
+      propertyBadge: 'Main Residence',
+      propertyBadgeClass: isDark
+        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+        : 'bg-blue-100 text-blue-800 border-blue-200',
+      headline: 'Real Estate Tax (Schedule A Itemized)',
+      explanation: 'State and local real estate property taxes on your primary residence are deductible if you itemize deductions (subject to the $10,000 total SALT limit).',
+      scheduleBadge: 'Schedule A · Itemized',
+      scheduleBadgeClass: isDark
+        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+        : 'bg-amber-100 text-amber-800 border-amber-200',
+      isDeductibleDefault: true,
+    };
+  }
+
+  if (category === 'Mortgage & Rent') {
+    return {
+      propertyBadge: 'Main Residence',
+      propertyBadgeClass: isDark
+        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+        : 'bg-blue-100 text-blue-800 border-blue-200',
+      headline: 'Mortgage Interest (Schedule A Itemized)',
+      explanation: 'Qualified home mortgage interest on loans up to $750k ($1M if pre-2017) is deductible on Schedule A when itemizing (reported on Form 1098).',
+      scheduleBadge: 'Schedule A · Mortgage',
+      scheduleBadgeClass: isDark
+        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+        : 'bg-amber-100 text-amber-800 border-amber-200',
+      isDeductibleDefault: true,
+    };
+  }
+
+  if (category === 'Solar') {
+    return {
+      propertyBadge: 'Main Residence',
+      propertyBadgeClass: isDark
+        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+        : 'bg-blue-100 text-blue-800 border-blue-200',
+      headline: '30% Clean Energy Tax Credit (Form 5695)',
+      explanation: 'Solar electric, solar water heating, and battery storage installations on your main home qualify for a 30% federal clean energy tax credit directly against your tax bill.',
+      scheduleBadge: 'Form 5695 · Tax Credit',
+      scheduleBadgeClass: isDark
+        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+        : 'bg-cyan-100 text-cyan-800 border-cyan-200',
+      isDeductibleDefault: true,
+    };
+  }
+
+  if (category === 'Improvements & Renovations' || type === 'Upgrade') {
+    return {
+      propertyBadge: 'Main Residence',
+      propertyBadgeClass: isDark
+        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+        : 'bg-blue-100 text-blue-800 border-blue-200',
+      headline: 'Capital Improvement (Adjusts Cost Basis)',
+      explanation: 'Not deductible in the current tax year, but permanently increases your home’s cost basis to reduce taxable capital gains when you sell (Pub. 523 / Section 121).',
+      scheduleBadge: 'Cost Basis Adjustment',
+      scheduleBadgeClass: isDark
+        ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+        : 'bg-purple-100 text-purple-800 border-purple-200',
+      isDeductibleDefault: false,
+    };
+  }
+
+  // General routine upkeep on personal residence
+  return {
+    propertyBadge: 'Main Residence',
+    propertyBadgeClass: isDark
+      ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+      : 'bg-blue-100 text-blue-800 border-blue-200',
+    headline: 'Personal Living Expense (Non-Deductible)',
+    explanation: 'Routine upkeep, handyman repairs, lawn care, utilities, and general maintenance on your personal home are non-deductible personal living expenses.',
+    scheduleBadge: 'Personal · Non-Deductible',
+    scheduleBadgeClass: isDark
+      ? 'bg-slate-800 text-slate-400 border-slate-700'
+      : 'bg-slate-100 text-slate-600 border-slate-200',
+    isDeductibleDefault: false,
+  };
+};
+
 interface RecordFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -85,6 +331,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
   const [provider, setProvider] = useState('');
   const [notes, setNotes] = useState('');
   const [paymentType, setPaymentType] = useState<PaymentType>('Cash');
+  const [transactionType, setTransactionType] = useState<'Debit' | 'Credit'>('Debit');
   const [isTaxDeductible, setIsTaxDeductible] = useState(false);
 
   // Optional Reminder
@@ -143,6 +390,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       setProvider(initialRecord.provider || '');
       setNotes(initialRecord.notes || '');
       setPaymentType(initialRecord.paymentType || 'Cash');
+      setTransactionType(initialRecord.transactionType || 'Debit');
       setIsTaxDeductible(initialRecord.isTaxDeductible !== undefined ? Boolean(initialRecord.isTaxDeductible) : Boolean(initialHome?.isIncomeProperty));
       setNextServiceDate(initialRecord.nextServiceDate || '');
       setAddNextReminder(Boolean(initialRecord.nextServiceDate));
@@ -161,30 +409,46 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       setProvider('');
       setNotes('');
       setPaymentType('Cash');
+      setTransactionType('Debit');
       setIsTaxDeductible(Boolean(defaultHome?.isIncomeProperty) || defaultCat === 'Tax' || defaultCat === 'Property Tax');
       setNextServiceDate('');
       setAddNextReminder(false);
     }
   }, [initialRecord, isOpen, activeHomeId, homes, overrideDoc]);
 
+  const isIncomeProp = Boolean(selectedHome?.isIncomeProperty);
+
+  const taxAdvice = useMemo(() => {
+    return getTaxTreatmentAdvice(isIncomeProp, category, type, isDark, transactionType);
+  }, [isIncomeProp, category, type, isDark, transactionType]);
+
   if (!isOpen) return null;
 
   const handleHomeChange = (newHomeId: string) => {
     setHomeId(newHomeId);
     const newHome = homes.find(h => h.id === newHomeId);
-    if (newHome?.isIncomeProperty) {
-      setIsTaxDeductible(true);
-    }
+    const isNewIncome = Boolean(newHome?.isIncomeProperty);
+    const advice = getTaxTreatmentAdvice(isNewIncome, category, type, isDark, transactionType);
+    setIsTaxDeductible(advice.isDeductibleDefault);
   };
 
   const handleCategoryChange = (newCategory: MaintenanceCategory) => {
     setCategory(newCategory);
     setSubcategory('');
-    setIsTaxDeductible(
-      Boolean(selectedHome?.isIncomeProperty) ||
-      newCategory === 'Tax' ||
-      newCategory === 'Property Tax'
-    );
+    const advice = getTaxTreatmentAdvice(isIncomeProp, newCategory, type, isDark, transactionType);
+    setIsTaxDeductible(advice.isDeductibleDefault);
+  };
+
+  const handleTypeChange = (newType: MaintenanceType) => {
+    setType(newType);
+    const advice = getTaxTreatmentAdvice(isIncomeProp, category, newType, isDark, transactionType);
+    setIsTaxDeductible(advice.isDeductibleDefault);
+  };
+
+  const handleTransactionTypeChange = (newDirection: 'Debit' | 'Credit') => {
+    setTransactionType(newDirection);
+    const advice = getTaxTreatmentAdvice(isIncomeProp, category, type, isDark, newDirection);
+    setIsTaxDeductible(advice.isDeductibleDefault);
   };
 
   const handleAddCost = (amountToAdd: number) => {
@@ -224,6 +488,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
       provider: provider.trim() || 'Self / DIY',
       notes: notes.trim() || undefined,
       paymentType,
+      transactionType,
       isTaxDeductible,
       nextServiceDate: addNextReminder && nextServiceDate ? nextServiceDate : undefined,
     };
@@ -360,22 +625,74 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5 custom-scrollbar">
 
-            {/* ROW 1: Hero Amount Entry & Quick Add Chips */}
-            <div className={`border rounded-lg p-2.5 relative transition-all ${
-              isDark
-                ? 'bg-slate-950/70 border-slate-800'
-                : 'bg-emerald-50/60 border-emerald-200/80'
+            {/* ROW 1: Transaction Type & Hero Amount Entry & Quick Add Chips */}
+            <div className={`border rounded-lg p-2.5 relative transition-all space-y-2 ${
+              transactionType === 'Credit'
+                ? isDark
+                  ? 'bg-emerald-950/40 border-emerald-500/40'
+                  : 'bg-emerald-50/90 border-emerald-300'
+                : isDark
+                  ? 'bg-slate-950/70 border-slate-800'
+                  : 'bg-slate-50 border-slate-200/90'
             }`}>
+              
+              {/* Transaction Type Segmented Switch */}
+              <div className="flex items-center justify-between gap-2 pb-1 border-b border-dashed border-slate-700/30">
+                <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                  isDark ? 'text-slate-300' : 'text-slate-700'
+                }`}>
+                  <DollarSign className="w-3 h-3 text-emerald-500" />
+                  Transaction Type <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
+                </label>
+                <div className={`p-0.5 rounded-lg border inline-flex items-center gap-0.5 ${
+                  isDark ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200 shadow-2xs'
+                }`}>
+                  <button
+                    type="button"
+                    onClick={() => handleTransactionTypeChange('Debit')}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition-all touch-manipulation active:scale-95 ${
+                      transactionType === 'Debit'
+                        ? isDark
+                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-xs'
+                          : 'bg-rose-50 text-rose-700 border border-rose-300 shadow-xs'
+                        : isDark
+                          ? 'text-slate-400 hover:text-slate-200'
+                          : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <span>💸 Debit (Expense)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleTransactionTypeChange('Credit')}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition-all touch-manipulation active:scale-95 ${
+                      transactionType === 'Credit'
+                        ? isDark
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
+                          : 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs'
+                        : isDark
+                          ? 'text-slate-400 hover:text-slate-200'
+                          : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <span>💰 Credit (Income / Refund)</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-12 gap-2 items-center">
                 
                 {/* Cost Input Box */}
                 <div className="col-span-12 sm:col-span-7">
                   <div className="flex items-center justify-between mb-0.5">
                     <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
-                      isDark ? 'text-slate-400' : 'text-emerald-900'
+                      transactionType === 'Credit'
+                        ? isDark ? 'text-emerald-300' : 'text-emerald-900'
+                        : isDark ? 'text-slate-400' : 'text-slate-700'
                     }`}>
-                      <DollarSign className={`w-3 h-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
-                      Expense Amount <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
+                      <DollarSign className={`w-3 h-3 ${transactionType === 'Credit' ? 'text-emerald-400' : isDark ? 'text-slate-400' : 'text-slate-600'}`} />
+                      {transactionType === 'Credit' ? 'Credit / Income Amount' : 'Expense Amount'}{' '}
+                      <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
                     </label>
                     {typeof cost === 'number' && cost > 0 && (
                       <button
@@ -393,8 +710,12 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                   </div>
                   <div className="relative flex items-center">
                     <span className={`text-xl font-extrabold font-mono select-none mr-1 ${
-                      isDark ? 'text-slate-400' : 'text-emerald-700'
-                    }`}>$</span>
+                      transactionType === 'Credit'
+                        ? isDark ? 'text-emerald-400' : 'text-emerald-600'
+                        : isDark ? 'text-slate-400' : 'text-slate-700'
+                    }`}>
+                      {transactionType === 'Credit' ? '+$' : '$'}
+                    </span>
                     <input
                       ref={costInputRef}
                       type="number"
@@ -416,10 +737,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
 
                 {/* Quick Add Chips */}
                 <div className={`col-span-12 sm:col-span-5 sm:border-l pt-1 sm:pt-0 ${
-                  isDark ? 'sm:border-slate-800 sm:pl-2.5' : 'sm:border-emerald-200/80 sm:pl-2.5'
+                  isDark ? 'sm:border-slate-800 sm:pl-2.5' : 'sm:border-slate-200 sm:pl-2.5'
                 }`}>
                   <span className={`block text-[9px] font-bold uppercase tracking-wider mb-0.5 ${
-                    isDark ? 'text-slate-500' : 'text-emerald-800'
+                    isDark ? 'text-slate-500' : 'text-slate-600'
                   }`}>Quick Add</span>
                   <div className="flex flex-wrap items-center gap-1">
                     {[10, 50, 100, 250, 500].map((amt) => (
@@ -430,7 +751,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                         className={`text-[11px] font-semibold px-2 py-0.5 rounded border transition-all active:scale-95 touch-manipulation ${
                           isDark
                             ? 'text-slate-300 bg-slate-900 hover:bg-emerald-500/20 border-slate-800'
-                            : 'text-emerald-800 bg-white hover:bg-emerald-100/80 border-emerald-200 shadow-2xs'
+                            : 'text-slate-800 bg-white hover:bg-emerald-50 border-slate-200 shadow-2xs'
                         }`}
                       >
                         +${amt}
@@ -594,7 +915,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     <button
                       key={t}
                       type="button"
-                      onClick={() => setType(t)}
+                      onClick={() => handleTypeChange(t)}
                       className={`py-1 px-1 rounded text-[11px] font-bold text-center transition-all active:scale-95 touch-manipulation truncate ${
                         isSelected
                           ? isDark
@@ -737,7 +1058,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     isDark ? 'text-slate-300' : 'text-slate-700'
                   }`}>
                     <User className="w-3 h-3 text-teal-500 shrink-0" />
-                    Provider / Contractor
+                    {transactionType === 'Credit' ? 'Source / Payer / Tenant' : 'Provider / Contractor'}
                   </label>
                   <button
                     type="button"
@@ -757,7 +1078,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                 </div>
                 <input
                   type="text"
-                  placeholder="e.g. Springfield HVAC, Home Depot"
+                  placeholder={transactionType === 'Credit' ? 'e.g. Tenant, Insurance Payout, Vendor Refund' : 'e.g. Springfield HVAC, Home Depot'}
                   value={provider}
                   onChange={(e) => setProvider(e.target.value)}
                   className={`w-full text-xs rounded-lg py-1.5 px-2 border focus:outline-none focus:border-teal-500 ${
@@ -791,7 +1112,56 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
               />
             </div>
 
-            {/* ROW 7: Smart Option Toggle Cards */}
+            {/* ROW 7: Tax Treatment Guidance Banner */}
+            <div className={`p-2.5 rounded-xl border transition-all space-y-1.5 ${
+              transactionType === 'Credit'
+                ? isDark
+                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-100'
+                  : 'bg-emerald-50/80 border-emerald-300 text-emerald-950'
+                : isIncomeProp
+                  ? isDark
+                    ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-100'
+                    : 'bg-emerald-50/80 border-emerald-300 text-emerald-950'
+                  : isDark
+                    ? 'bg-slate-950/60 border-slate-800 text-slate-300'
+                    : 'bg-slate-50 border-slate-200 text-slate-800'
+            }`}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Landmark className={`w-3.5 h-3.5 shrink-0 ${
+                    transactionType === 'Credit'
+                      ? 'text-emerald-500'
+                      : isIncomeProp
+                        ? 'text-emerald-500'
+                        : category === 'Tax' || category === 'Mortgage & Rent' || category === 'Solar'
+                          ? 'text-amber-500'
+                          : 'text-slate-400'
+                  }`} />
+                  <span className="text-[11px] font-extrabold truncate">
+                    {isIncomeProp ? 'Rental Property Tax Treatment' : 'Main Residence Tax Treatment'}{' '}
+                    <span className="text-[10px] opacity-75">({transactionType === 'Credit' ? 'Credit / Inflow' : 'Debit / Outflow'})</span>
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border ${taxAdvice.propertyBadgeClass}`}>
+                    {taxAdvice.propertyBadge}
+                  </span>
+                  <span className={`text-[9px] font-mono font-extrabold px-2 py-0.5 rounded-full border ${taxAdvice.scheduleBadgeClass}`}>
+                    {taxAdvice.scheduleBadge}
+                  </span>
+                </div>
+              </div>
+
+              <p className={`text-[11px] leading-snug ${
+                isDark ? 'text-slate-300' : 'text-slate-700'
+              }`}>
+                <strong className={isDark ? 'text-white' : 'text-slate-900'}>{taxAdvice.headline}: </strong>
+                {taxAdvice.explanation}
+              </p>
+            </div>
+
+            {/* ROW 8: Smart Option Toggle Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
               
               {/* Tax Deductible Card */}
@@ -807,7 +1177,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       : 'bg-slate-50 border-slate-200/80 text-slate-600'
                 }`}
               >
-                <div className={`p-1 rounded shrink-0 ${
+                <div className={`p-1.5 rounded-lg shrink-0 ${
                   isTaxDeductible
                     ? isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-200/60 text-amber-700'
                     : isDark ? 'bg-slate-900 text-slate-500' : 'bg-slate-200/60 text-slate-500'
@@ -817,12 +1187,12 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 truncate">
-                      <span className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>Tax Deductible</span>
-                      {selectedHome?.isIncomeProperty && (
-                        <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">
-                          Rental
-                        </span>
-                      )}
+                      <span className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
+                        {transactionType === 'Credit' ? 'Tax Deductible / Offset' : 'Flag as Tax Deductible'}
+                      </span>
+                      <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase border ${taxAdvice.scheduleBadgeClass}`}>
+                        {taxAdvice.scheduleBadge}
+                      </span>
                     </div>
                     <input
                       type="checkbox"
@@ -835,9 +1205,7 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                     />
                   </div>
                   <p className={`text-[9px] truncate ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    {selectedHome?.isIncomeProperty
-                      ? 'Auto-flagged (Income Property — Sched. E)'
-                      : 'Flag for tax deduction / reporting'}
+                    {taxAdvice.headline}
                   </p>
                 </div>
               </div>

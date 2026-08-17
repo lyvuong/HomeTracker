@@ -53,20 +53,22 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
         const monthName = dateObj.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
         monthsMap[monthKey] = { month: monthName, cost: 0 };
       }
-      monthsMap[monthKey].cost += r.cost;
+      // Outflow is positive, Credit offsets
+      monthsMap[monthKey].cost += r.transactionType === 'Credit' ? -r.cost : r.cost;
     });
 
-    return Object.values(monthsMap);
+    return Object.values(monthsMap).map(m => ({ ...m, cost: Math.max(0, m.cost) }));
   }, [filteredRecords]);
 
   // Aggregate cost by Category
   const categoryData = useMemo(() => {
     const catMap: Record<string, number> = {};
     filteredRecords.forEach(r => {
-      catMap[r.category] = (catMap[r.category] || 0) + r.cost;
+      catMap[r.category] = (catMap[r.category] || 0) + (r.transactionType === 'Credit' ? -r.cost : r.cost);
     });
     return Object.entries(catMap)
-      .map(([name, value]) => ({ name, value }))
+      .map(([name, value]) => ({ name, value: Math.max(0, value) }))
+      .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
   }, [filteredRecords]);
 
@@ -74,15 +76,24 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
   const typeData = useMemo(() => {
     const typeMap: Record<string, number> = {};
     filteredRecords.forEach(r => {
-      typeMap[r.type] = (typeMap[r.type] || 0) + r.cost;
+      typeMap[r.type] = (typeMap[r.type] || 0) + (r.transactionType === 'Credit' ? -r.cost : r.cost);
     });
-    return Object.entries(typeMap).map(([name, value]) => ({ name, value }));
+    return Object.entries(typeMap).map(([name, value]) => ({ name, value: Math.max(0, value) }));
   }, [filteredRecords]);
 
-  const totalSpent = filteredRecords.reduce((sum, r) => sum + r.cost, 0);
+  const totalDebits = filteredRecords
+    .filter(r => (r.transactionType || 'Debit') === 'Debit')
+    .reduce((sum, r) => sum + r.cost, 0);
+
+  const totalCredits = filteredRecords
+    .filter(r => r.transactionType === 'Credit')
+    .reduce((sum, r) => sum + r.cost, 0);
+
+  const netSpent = totalDebits - totalCredits;
+
   const totalTaxDeductible = filteredRecords
     .filter(r => r.isTaxDeductible)
-    .reduce((sum, r) => sum + r.cost, 0);
+    .reduce((sum, r) => sum + (r.transactionType === 'Credit' ? -r.cost : r.cost), 0);
 
   // Dynamic Theme Colors for Charts
   const chartColors = {
@@ -106,17 +117,24 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
             Cost & Maintenance Analytics
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Expense trends and category breakdown for {activeHome ? activeHome.nickname : 'All Homes'}
+            Expense trends, credits, and category breakdown for {activeHome ? activeHome.nickname : 'All Homes'}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <div className={`px-4 py-2.5 rounded-2xl border text-right ${
             isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
           }`}>
-            <span className="text-xs text-slate-500 dark:text-slate-400 block font-semibold">Total Spending</span>
-            <span className="text-xl font-extrabold text-slate-900 dark:text-white font-mono">
-              ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <span className="text-xs text-slate-500 dark:text-slate-400 block font-semibold">
+              {totalCredits > 0 ? 'Net Spending' : 'Total Spending'}
             </span>
+            <span className="text-xl font-extrabold text-slate-900 dark:text-white font-mono">
+              ${netSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            {totalCredits > 0 && (
+              <span className="block text-[10px] text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+                (+$ {totalCredits.toFixed(0)} Credits)
+              </span>
+            )}
           </div>
           <div className={`px-4 py-2.5 rounded-2xl border text-right ${
             isDark ? 'bg-amber-950/30 border-amber-800/50' : 'bg-amber-50/80 border-amber-200'

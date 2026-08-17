@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import {
-  History,
   Search,
   Plus,
   Download,
   Edit2,
   Trash2,
   Landmark,
-  Wrench
+  Wrench,
+  ArrowDownLeft,
+  ArrowUpRight
 } from 'lucide-react';
 import type { Home, EnrichedHomeRecord, Target, TaxonomyOverrideDoc } from '../../types';
 import { exportRecordsAsCSV } from '../../services/storage';
@@ -46,6 +47,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [selectedSubcategoryFilter, setSelectedSubcategoryFilter] = useState<string>('all');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('all');
+  const [selectedDirectionFilter, setSelectedDirectionFilter] = useState<'all' | 'Debit' | 'Credit'>('all');
   const [taxDeductibleOnly, setTaxDeductibleOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'cost-desc'>('date-desc');
@@ -78,6 +80,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
       if (selectedCategoryFilter !== 'all' && r.category !== selectedCategoryFilter) return false;
       if (selectedSubcategoryFilter !== 'all' && r.subcategory !== selectedSubcategoryFilter) return false;
       if (selectedTypeFilter !== 'all' && r.type !== selectedTypeFilter) return false;
+      if (selectedDirectionFilter !== 'all' && (r.transactionType || 'Debit') !== selectedDirectionFilter) return false;
       if (taxDeductibleOnly && !r.isTaxDeductible) return false;
 
       if (searchQuery.trim()) {
@@ -107,9 +110,21 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
       if (sortBy === 'cost-desc') return b.cost - a.cost;
       return 0;
     });
-  }, [records, selectedHomeFilter, selectedCategoryFilter, selectedSubcategoryFilter, selectedTypeFilter, taxDeductibleOnly, searchQuery, sortBy, homeMap]);
+  }, [records, selectedHomeFilter, selectedCategoryFilter, selectedSubcategoryFilter, selectedTypeFilter, selectedDirectionFilter, taxDeductibleOnly, searchQuery, sortBy, homeMap]);
 
-  const totalFilteredCost = filteredRecords.reduce((sum, r) => sum + r.cost, 0);
+  const totalDebits = useMemo(() => {
+    return filteredRecords
+      .filter(r => (r.transactionType || 'Debit') === 'Debit')
+      .reduce((sum, r) => sum + r.cost, 0);
+  }, [filteredRecords]);
+
+  const totalCredits = useMemo(() => {
+    return filteredRecords
+      .filter(r => r.transactionType === 'Credit')
+      .reduce((sum, r) => sum + r.cost, 0);
+  }, [filteredRecords]);
+
+  const netCost = totalDebits - totalCredits;
 
   const handleExportCSV = () => {
     exportRecordsAsCSV(filteredRecords, homes);
@@ -123,10 +138,10 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
         <div>
           <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
             <Wrench className="w-6 h-6 text-emerald-500" />
-            Home Expense History
+            Home Expense & Transaction History
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Complete logs of all maintenance, upgrades, repairs, and property expenses
+            Complete logs of all maintenance, repairs, upgrades, property debits, and credits
           </p>
         </div>
 
@@ -143,14 +158,14 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            Log Expense
+            Log Expense / Credit
           </button>
         </div>
       </div>
 
       {/* Filter / Search Toolbar */}
       <div className="glass-card p-4.5 rounded-3xl space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
 
           {/* Search Box */}
           <div className="relative col-span-1 sm:col-span-2 md:col-span-1">
@@ -193,7 +208,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           </select>
 
           {/* Filter Subcategory */}
-          {availableSubcategories.length > 0 && (
+          {availableSubcategories.length > 0 ? (
             <select
               value={selectedSubcategoryFilter}
               onChange={(e) => setSelectedSubcategoryFilter(e.target.value)}
@@ -206,34 +221,46 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                 </option>
               ))}
             </select>
+          ) : (
+            <select
+              value={selectedTypeFilter}
+              onChange={(e) => setSelectedTypeFilter(e.target.value)}
+              className="glass-input text-xs rounded-xl px-3 py-2.5 cursor-pointer font-medium"
+            >
+              <option value="all">🔧 All Types</option>
+              {TYPES.map(t => (
+                <option key={t} value={t} className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}>
+                  {t}
+                </option>
+              ))}
+            </select>
           )}
 
-          {/* Filter Type */}
+          {/* Filter Direction (Debit vs Credit) */}
           <select
-            value={selectedTypeFilter}
-            onChange={(e) => setSelectedTypeFilter(e.target.value)}
+            value={selectedDirectionFilter}
+            onChange={(e: any) => setSelectedDirectionFilter(e.target.value)}
             className="glass-input text-xs rounded-xl px-3 py-2.5 cursor-pointer font-medium"
           >
-            <option value="all">🔧 All Types</option>
-            {TYPES.map(t => (
-              <option key={t} value={t} className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}>
-                {t}
-              </option>
-            ))}
+            <option value="all">💸 All Debits & Credits</option>
+            <option value="Debit">💸 Debits (Expenses Only)</option>
+            <option value="Credit">💰 Credits (Income / Refunds)</option>
           </select>
 
         </div>
 
         <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
-          <select
-            value={sortBy}
-            onChange={(e: any) => setSortBy(e.target.value)}
-            className="glass-input text-xs rounded-xl px-3 py-2 cursor-pointer font-medium"
-          >
-            <option value="date-desc">📅 Newest First</option>
-            <option value="date-asc">📅 Oldest First</option>
-            <option value="cost-desc">💲 Highest Cost</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <select
+              value={sortBy}
+              onChange={(e: any) => setSortBy(e.target.value)}
+              className="glass-input text-xs rounded-xl px-3 py-2 cursor-pointer font-medium"
+            >
+              <option value="date-desc">📅 Newest First</option>
+              <option value="date-asc">📅 Oldest First</option>
+              <option value="cost-desc">💲 Highest Amount</option>
+            </select>
+          </div>
 
           <label className={`flex items-center gap-2 text-xs font-bold cursor-pointer select-none ${
             isDark ? 'text-slate-300' : 'text-slate-700'
@@ -250,11 +277,18 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
         </div>
 
         {/* Filter Summary & Total Bar */}
-        <div className={`flex items-center justify-between text-xs pt-3 border-t ${
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs pt-3 border-t ${
           isDark ? 'border-slate-800 text-slate-400' : 'border-slate-100 text-slate-500'
         }`}>
           <span>Showing <strong className="text-emerald-600 dark:text-emerald-400">{filteredRecords.length}</strong> log entries</span>
-          <span>Total Expenses: <strong className="text-slate-900 dark:text-white font-mono text-sm">${totalFilteredCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+          
+          <div className="flex items-center gap-3 flex-wrap">
+            <span>Expenses: <strong className="text-slate-900 dark:text-white font-mono">${totalDebits.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+            {totalCredits > 0 && (
+              <span>Credits: <strong className="text-emerald-600 dark:text-emerald-400 font-mono">+${totalCredits.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+            )}
+            <span className="pl-1 border-l border-slate-700">Net: <strong className="text-slate-900 dark:text-white font-mono text-sm">${netCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+          </div>
         </div>
       </div>
 
@@ -267,18 +301,27 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             const targetMeta = TARGET_META[recTarget] || TARGET_META['Property'];
             const targetStyles = COLOR_STYLES[targetMeta.color];
             const TargetIcon = targetMeta.icon;
+            const isCredit = record.transactionType === 'Credit';
 
             return (
               <div
                 key={record.id}
-                className="glass-card p-5 rounded-3xl transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+                className={`glass-card p-5 rounded-3xl transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 group ${
+                  isCredit ? (isDark ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-emerald-500') : ''
+                }`}
               >
 
                 <div className="flex items-start gap-4 min-w-0">
                   <div className={`p-3 rounded-2xl border shrink-0 mt-0.5 ${
-                    isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                    isCredit
+                      ? isDark
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                        : 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                      : isDark
+                        ? 'bg-slate-800 text-slate-300 border-slate-700'
+                        : 'bg-slate-100 text-slate-700 border-slate-200'
                   }`}>
-                    <History className="w-5 h-5" />
+                    {isCredit ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                   </div>
 
                   <div className="space-y-1 min-w-0 flex-1">
@@ -289,6 +332,19 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                           <span>{record.target}</span>
                         </span>
                       )}
+                      
+                      <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${
+                        isCredit
+                          ? isDark
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                          : isDark
+                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                            : 'bg-rose-50 text-rose-700 border-rose-200'
+                      }`}>
+                        {isCredit ? 'Credit (Income/Refund)' : 'Debit (Expense)'}
+                      </span>
+
                       <h3 className={`font-extrabold text-base truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         {record.category}
                         {record.subcategory && (
@@ -297,6 +353,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                           </span>
                         )}
                       </h3>
+
                       <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md border ${
                         record.type === 'Repair' ? 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30' :
                         record.type === 'Maintenance' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' :
@@ -306,6 +363,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                       }`}>
                         {record.type}
                       </span>
+
                       {record.isTaxDeductible && (
                         <span className="flex items-center gap-1 text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                           <Landmark className="w-3 h-3" />
@@ -322,7 +380,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
 
                     {record.provider && (
                       <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                        Provider: <strong>{record.provider}</strong>
+                        {isCredit ? 'Source / Payer: ' : 'Provider: '}<strong>{record.provider}</strong>
                       </p>
                     )}
 
@@ -351,8 +409,12 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                 {/* Right side: Amount, Date, Actions */}
                 <div className="flex md:flex-col items-end justify-between md:justify-center gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-800/40">
                   <div className="text-left md:text-right">
-                    <span className={`text-xl font-extrabold font-mono block ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                      ${record.cost.toFixed(2)}
+                    <span className={`text-xl font-extrabold font-mono block ${
+                      isCredit
+                        ? 'text-emerald-500 dark:text-emerald-400'
+                        : isDark ? 'text-white' : 'text-slate-900'
+                    }`}>
+                      {isCredit ? '+' : ''}${record.cost.toFixed(2)}
                     </span>
                     <span className={`text-xs font-mono block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                       {record.date}
