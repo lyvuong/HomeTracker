@@ -289,7 +289,7 @@ export const getStoredFirebaseConfig = (): FirebaseConfig | null => {
   try {
     const raw = localStorage.getItem(FIREBASE_CONFIG_KEY);
     return raw ? JSON.parse(raw) : null;
-  } catch (err) {
+  } catch {
     return null;
   }
 };

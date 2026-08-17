@@ -801,6 +801,7 @@ export const App: React.FC = () => {
               setIsReminderModalOpen(true);
             }}
             onSelectTab={(tab: 'history' | 'reminders' | 'analytics' | 'homes') => setActiveTab(tab)}
+            theme={theme}
           />
         )}
 
@@ -813,6 +814,7 @@ export const App: React.FC = () => {
             onSaveHome={handleSaveHome}
             onDeleteHome={handleDeleteHome}
             onOpenSettings={() => setActiveTab('settings')}
+            theme={theme}
           />
         )}
 
@@ -831,6 +833,7 @@ export const App: React.FC = () => {
             }}
             onDeleteRecord={handleDeleteRecord}
             overrideDoc={taxonomyOverrideDoc}
+            theme={theme}
           />
         )}
 
@@ -843,6 +846,8 @@ export const App: React.FC = () => {
             onDeleteReminder={handleDeleteReminder}
             onToggleComplete={handleToggleCompleteReminder}
             onCompleteAndLogService={handleCompleteAndLogService}
+            overrideDoc={taxonomyOverrideDoc}
+            theme={theme}
           />
         )}
 
@@ -851,6 +856,7 @@ export const App: React.FC = () => {
             homes={homes}
             activeHomeId={activeHomeId}
             records={enrichedRecords}
+            theme={theme}
           />
         )}
 
@@ -867,12 +873,14 @@ export const App: React.FC = () => {
             onManagePaymentTypes={() => setIsPaymentTypesModalOpen(true)}
             categoriesCount={getEffectiveCategories(taxonomyOverrideDoc).length}
             onManageCategories={() => setIsTaxonomyModalOpen(true)}
+            theme={theme}
           />
         )}
 
         {activeTab === 'about' && (
           <AboutPage
             onOpenSettings={() => setActiveTab('settings')}
+            theme={theme}
           />
         )}
 
@@ -899,6 +907,7 @@ export const App: React.FC = () => {
         isOpen={isHomeModalOpen}
         onClose={() => setIsHomeModalOpen(false)}
         onSave={handleSaveHome}
+        theme={theme}
       />
 
       <ReminderModal
@@ -909,12 +918,14 @@ export const App: React.FC = () => {
         activeHomeId={activeHomeId}
         initialReminder={editingReminder}
         overrideDoc={taxonomyOverrideDoc}
+        theme={theme}
       />
 
       <PaymentTypesModal
         isOpen={isPaymentTypesModalOpen}
         onClose={() => setIsPaymentTypesModalOpen(false)}
         paymentTypes={paymentTypes}
+        theme={theme}
       />
 
       <CategoryTaxonomyModal
@@ -937,7 +948,9 @@ export const App: React.FC = () => {
       <PWAInstallPrompt />
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs font-medium text-slate-300 no-print">
+      <footer className={`border-t py-6 text-center text-xs font-medium no-print transition-colors ${
+        theme === 'dark' ? 'border-slate-800 bg-slate-950/80 text-slate-400' : 'border-slate-200 bg-white/80 text-slate-500'
+      }`}>
         <p>HomeTracker Progressive Web App • Cloudflare Pages Ready • Offline Capable</p>
       </footer>
 

@@ -20,14 +20,18 @@ interface CostAnalyticsProps {
   homes: Home[];
   activeHomeId: string;
   records: EnrichedHomeRecord[];
+  theme?: 'light' | 'dark';
 }
 
 export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
   homes,
   activeHomeId,
-  records
+  records,
+  theme = 'light'
 }) => {
+  const isDark = theme === 'dark';
   const activeHome = homes.find(h => h.id === activeHomeId);
+  
   const filteredRecords = useMemo(() => {
     return activeHomeId === 'all'
       ? records
@@ -80,33 +84,48 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
     .filter(r => r.isTaxDeductible)
     .reduce((sum, r) => sum + r.cost, 0);
 
+  // Dynamic Theme Colors for Charts
+  const chartColors = {
+    grid: isDark ? '#334155' : '#e2e8f0',
+    axisText: isDark ? '#94a3b8' : '#64748b',
+    legendText: isDark ? '#cbd5e1' : '#334155',
+    tooltipBg: isDark ? '#0f172a' : '#ffffff',
+    tooltipBorder: isDark ? '#334155' : '#e2e8f0',
+    tooltipColor: isDark ? '#f8fafc' : '#0f172a',
+    tooltipShadow: isDark ? '0 10px 25px -5px rgba(0,0,0,0.5)' : '0 10px 25px -5px rgba(0,0,0,0.1)'
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-3xl">
         <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-emerald-400" />
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+            <BarChart3 className="w-6 h-6 text-emerald-500" />
             Cost & Maintenance Analytics
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Expense trends and category breakdown for {activeHome ? activeHome.nickname : 'All Homes'}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <div className="bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-right">
-            <span className="text-xs text-slate-400 block font-medium">Total Filtered Spending</span>
-            <span className="text-xl font-extrabold text-white font-mono">
+          <div className={`px-4 py-2.5 rounded-2xl border text-right ${
+            isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+          }`}>
+            <span className="text-xs text-slate-500 dark:text-slate-400 block font-semibold">Total Spending</span>
+            <span className="text-xl font-extrabold text-slate-900 dark:text-white font-mono">
               ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
-          <div className="bg-slate-900 border border-amber-800/60 px-4 py-2 rounded-xl text-right">
-            <span className="text-xs text-amber-400 block font-medium flex items-center justify-end gap-1">
-              <Landmark className="w-3 h-3" />
-              Tax-Deductible Total
+          <div className={`px-4 py-2.5 rounded-2xl border text-right ${
+            isDark ? 'bg-amber-950/30 border-amber-800/50' : 'bg-amber-50/80 border-amber-200'
+          }`}>
+            <span className="text-xs text-amber-600 dark:text-amber-400 block font-semibold flex items-center justify-end gap-1">
+              <Landmark className="w-3.5 h-3.5" />
+              Tax Deductible
             </span>
-            <span className="text-xl font-extrabold text-white font-mono">
+            <span className="text-xl font-extrabold text-amber-700 dark:text-amber-300 font-mono">
               ${totalTaxDeductible.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           </div>
@@ -114,28 +133,34 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
       </div>
 
       {filteredRecords.length === 0 ? (
-        <div className="glass-panel p-12 text-center rounded-2xl text-slate-400">
+        <div className="glass-panel p-12 text-center rounded-3xl text-slate-400 dark:text-slate-500 text-sm">
           No expense records available to render analytics charts. Log maintenance first.
         </div>
       ) : (
         <>
           {/* Monthly Trend Chart */}
-          <div className="glass-panel p-6 rounded-2xl">
-            <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-emerald-400" />
+          <div className="glass-panel p-6 rounded-3xl">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-emerald-500" />
               Monthly Maintenance Expense Trend ($)
             </h2>
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                  <XAxis dataKey="month" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                  <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                  <XAxis dataKey="month" stroke={chartColors.axisText} tick={{ fill: chartColors.axisText, fontSize: 12 }} />
+                  <YAxis stroke={chartColors.axisText} tick={{ fill: chartColors.axisText, fontSize: 12 }} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff' }}
+                    contentStyle={{
+                      backgroundColor: chartColors.tooltipBg,
+                      borderColor: chartColors.tooltipBorder,
+                      borderRadius: '16px',
+                      color: chartColors.tooltipColor,
+                      boxShadow: chartColors.tooltipShadow
+                    }}
                     formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Cost']}
                   />
-                  <Bar dataKey="cost" fill="#10b981" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="cost" fill="#10b981" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -145,9 +170,9 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Category Pie Chart */}
-            <div className="glass-panel p-6 rounded-2xl">
-              <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-                <PieIcon className="w-5 h-5 text-amber-400" />
+            <div className="glass-panel p-6 rounded-3xl">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <PieIcon className="w-5 h-5 text-amber-500" />
                 Cost Breakdown by Category
               </h2>
               <div className="h-72 w-full">
@@ -167,12 +192,18 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff' }}
+                      contentStyle={{
+                        backgroundColor: chartColors.tooltipBg,
+                        borderColor: chartColors.tooltipBorder,
+                        borderRadius: '16px',
+                        color: chartColors.tooltipColor,
+                        boxShadow: chartColors.tooltipShadow
+                      }}
                       formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Spent']}
                     />
                     <Legend
                       wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
-                      formatter={(value) => <span style={{ color: '#cbd5e1' }}>{value}</span>}
+                      formatter={(value) => <span style={{ color: chartColors.legendText, fontWeight: 500 }}>{value}</span>}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -180,9 +211,9 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
             </div>
 
             {/* Maintenance Type Breakdown Chart */}
-            <div className="glass-panel p-6 rounded-2xl">
-              <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-emerald-400" />
+            <div className="glass-panel p-6 rounded-3xl">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-emerald-500" />
                 Maintenance vs. Repair Distribution
               </h2>
               <div className="h-72 w-full">
@@ -201,12 +232,18 @@ export const CostAnalytics: React.FC<CostAnalyticsProps> = ({
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#fff' }}
+                      contentStyle={{
+                        backgroundColor: chartColors.tooltipBg,
+                        borderColor: chartColors.tooltipBorder,
+                        borderRadius: '16px',
+                        color: chartColors.tooltipColor,
+                        boxShadow: chartColors.tooltipShadow
+                      }}
                       formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Spent']}
                     />
                     <Legend
                       wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
-                      formatter={(value) => <span style={{ color: '#cbd5e1' }}>{value}</span>}
+                      formatter={(value) => <span style={{ color: chartColors.legendText, fontWeight: 500 }}>{value}</span>}
                     />
                   </PieChart>
                 </ResponsiveContainer>

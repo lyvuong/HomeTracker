@@ -4,14 +4,33 @@
   html.dark body, body {
     background-color: #090d16;
     color: #f1f5f9;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 
   html.light body {
     background-color: #f8fafc;
     color: #0f172a;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+}
+
+/* Glass Panels & Surfaces in Dark & Light Modes */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  color: #f8fafc;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  color: #f8fafc;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
 /* Light Mode Overrides for Glass Cards & Panels */
@@ -19,17 +38,17 @@ html.light .glass-panel {
   background: #ffffff !important;
   color: #0f172a !important;
   border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
 html.light .glass-card {
   background: #ffffff !important;
   color: #0f172a !important;
   border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
 
-/* Ensure headings & text inside glass cards in Light Mode are crisp dark slate */
+/* Light Mode typography inside glass cards */
 html.light :is(.glass-card, .glass-panel) h1,
 html.light :is(.glass-card, .glass-panel) h2,
 html.light :is(.glass-card, .glass-panel) h3,
@@ -46,15 +65,10 @@ html.light :is(.glass-card, .glass-panel) .text-slate-300 {
 
 html.light :is(.glass-card, .glass-panel) .text-slate-400,
 html.light :is(.glass-card, .glass-panel) .text-slate-500 {
-  color: #475569 !important;
+  color: #64748b !important;
 }
 
-/* Elements that keep an explicit static dark chip background (e.g. bg-slate-800/900/950)
-   inside a light-mode glass card are an intentional dark chip, not the card surface
-   itself — their own light-on-dark text must be preserved, not forced dark-on-dark.
-   Matched as a standalone class token (start-of-string or preceded by a space) so a
-   hover/focus-only variant like "hover:bg-slate-800/30" — which is NOT the resting
-   background — never falsely counts as a static dark chip. */
+/* Static colored chips preserve their vibrant contrast */
 html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-white,
 html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-white {
   color: #ffffff !important;
@@ -63,31 +77,23 @@ html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" b
 html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-100 {
   color: #f1f5f9 !important;
 }
-html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-200,
-html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-200 {
-  color: #e2e8f0 !important;
-}
-html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-300,
-html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-300 {
-  color: #cbd5e1 !important;
-}
-html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-400,
-html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-400 {
-  color: #94a3b8 !important;
-}
-html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]).text-slate-500,
-html.light :is(.glass-card, .glass-panel) :is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) .text-slate-500 {
-  color: #64748b !important;
-}
 
+/* Glass Inputs */
 .glass-input {
   background: #0f172a;
   color: #ffffff;
   border: 1px solid #334155;
+  transition: all 0.15s ease-in-out;
 }
 
 .glass-input::placeholder {
   color: #94a3b8;
+}
+
+.glass-input:focus {
+  border-color: #10b981;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
 html.light .glass-input {
@@ -96,44 +102,60 @@ html.light .glass-input {
   border: 1px solid #cbd5e1 !important;
 }
 
+html.light .glass-input::placeholder {
+  color: #94a3b8 !important;
+}
+
 html.light .glass-input:focus {
   border-color: #059669 !important;
   outline: none;
   box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2) !important;
 }
 
+/* Form controls light theme text color */
 html.light input,
 html.light select,
 html.light textarea {
-  color: #0f172a !important;
+  color: #0f172a;
 }
 
 html.light input::placeholder,
 html.light textarea::placeholder {
-  color: #64748b !important;
+  color: #94a3b8;
 }
 
-/* Inputs/selects/textareas that keep an explicit static dark chip background
-   (e.g. bg-slate-800/900) and are NOT already theme-adaptive via .glass-input —
-   their typed text and placeholder must stay light-on-dark, not get forced
-   dark-on-dark by the rules above. .glass-input fields are excluded here since
-   they intentionally switch to a light background + dark text in light mode. */
-html.light :is(input, select, textarea):not(.glass-input):is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"]) {
-  color: #ffffff !important;
+/* Glass Buttons */
+.glass-button {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  color: #f1f5f9;
+  transition: all 0.15s ease;
 }
 
-html.light :is(input, textarea):not(.glass-input):is([class^="bg-slate-8"], [class*=" bg-slate-8"], [class^="bg-slate-9"], [class*=" bg-slate-9"])::placeholder {
-  color: #94a3b8 !important;
+.glass-button:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: rgba(71, 85, 105, 0.9);
+}
+
+html.light .glass-button {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+html.light .glass-button:hover {
+  background: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 html.dark ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #090d16;
 }
 html.light ::-webkit-scrollbar-track {
   background: #f1f5f9;
@@ -141,26 +163,42 @@ html.light ::-webkit-scrollbar-track {
 
 html.dark ::-webkit-scrollbar-thumb {
   background: #334155;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 html.light ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #059669;
+  background: #10b981;
 }
 
-/* Glow effects */
+/* Subtle glow accents */
 .glow-emerald {
-  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.35);
 }
 .glow-cyan {
-  box-shadow: 0 0 20px -5px rgba(2, 132, 199, 0.4);
+  box-shadow: 0 0 20px -5px rgba(2, 132, 199, 0.35);
 }
 .glow-amber {
-  box-shadow: 0 0 20px -5px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 0 20px -5px rgba(245, 158, 11, 0.35);
+}
+
+/* Modal Animations */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal {
+  animation: modalFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Print Styles */

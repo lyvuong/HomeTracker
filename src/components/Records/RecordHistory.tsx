@@ -4,10 +4,10 @@ import {
   Search,
   Plus,
   Download,
-  Printer,
   Edit2,
   Trash2,
-  Landmark
+  Landmark,
+  Wrench
 } from 'lucide-react';
 import type { Home, EnrichedHomeRecord, Target, TaxonomyOverrideDoc } from '../../types';
 import { exportRecordsAsCSV } from '../../services/storage';
@@ -27,6 +27,7 @@ interface RecordHistoryProps {
   onEditRecord: (record: EnrichedHomeRecord) => void;
   onDeleteRecord: (id: string) => void;
   overrideDoc?: TaxonomyOverrideDoc;
+  theme?: 'light' | 'dark';
 }
 
 export const RecordHistory: React.FC<RecordHistoryProps> = ({
@@ -36,8 +37,11 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
   onOpenAddService,
   onEditRecord,
   onDeleteRecord,
-  overrideDoc
+  overrideDoc,
+  theme = 'light'
 }) => {
+  const isDark = theme === 'dark';
+
   const [selectedHomeFilter, setSelectedHomeFilter] = useState<string>(activeHomeId || 'all');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [selectedSubcategoryFilter, setSelectedSubcategoryFilter] = useState<string>('all');
@@ -57,8 +61,7 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
     return Array.from(new Set([...effective, ...fromRecords]));
   }, [overrideDoc, records]);
 
-  // Subcategories are per-category, so this only appears once a category
-  // that defines them is selected.
+  // Subcategories are per-category
   const availableSubcategories = useMemo(() => {
     if (selectedCategoryFilter === 'all') return [];
     return getEffectiveSubcategoriesForTarget('Property', selectedCategoryFilter, overrideDoc);
@@ -112,47 +115,32 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
     exportRecordsAsCSV(filteredRecords, homes);
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
 
-      {/* Top Banner & Header Actions */}
+      {/* Header with Title and Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-3xl">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
-              <History className="w-5 h-5" />
-            </div>
-            <h1 className="text-2xl font-black text-white font-display">Home Expense & Maintenance Log</h1>
-          </div>
-          <p className="text-xs text-slate-400">
-            Comprehensive timeline of maintenance, repairs, and every home-related expense.
+        <div>
+          <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+            <Wrench className="w-6 h-6 text-emerald-500" />
+            Home Expense History
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Complete logs of all maintenance, upgrades, repairs, and property expenses
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 no-print">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3.5 py-2 rounded-xl border border-slate-700 transition-all"
+            className="glass-button text-xs font-bold px-3.5 py-2.5 rounded-xl flex items-center gap-2 active:scale-95"
           >
-            <Download className="w-4 h-4 text-emerald-400" />
+            <Download className="w-4 h-4" />
             Export CSV
           </button>
-
-          <button
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3.5 py-2 rounded-xl border border-slate-700 transition-all"
-          >
-            <Printer className="w-4 h-4 text-slate-400" />
-            Print Report
-          </button>
-
           <button
             onClick={onOpenAddService}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+            className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
             Log Expense
@@ -160,19 +148,19 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
         </div>
       </div>
 
-      {/* Filter & Search Toolbar */}
-      <div className="glass-panel p-4 rounded-2xl space-y-3 no-print">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Filter / Search Toolbar */}
+      <div className="glass-card p-4.5 rounded-3xl space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
 
-          {/* Search Field */}
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          {/* Search Box */}
+          <div className="relative col-span-1 sm:col-span-2 md:col-span-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search category, payee, notes..."
+              placeholder="Search history..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full glass-input text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full glass-input text-xs rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
 
@@ -180,11 +168,11 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           <select
             value={selectedHomeFilter}
             onChange={(e) => setSelectedHomeFilter(e.target.value)}
-            className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className="glass-input text-xs rounded-xl px-3 py-2.5 cursor-pointer font-medium"
           >
             <option value="all">🏠 All Homes ({homes.length})</option>
             {homes.map(h => (
-              <option key={h.id} value={h.id}>
+              <option key={h.id} value={h.id} className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}>
                 {h.nickname}
               </option>
             ))}
@@ -194,11 +182,13 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           <select
             value={selectedCategoryFilter}
             onChange={(e) => handleCategoryFilterChange(e.target.value)}
-            className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className="glass-input text-xs rounded-xl px-3 py-2.5 cursor-pointer font-medium"
           >
             <option value="all">📋 All Categories</option>
             {filterCategories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat} value={cat} className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}>
+                {cat}
+              </option>
             ))}
           </select>
 
@@ -207,11 +197,13 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             <select
               value={selectedSubcategoryFilter}
               onChange={(e) => setSelectedSubcategoryFilter(e.target.value)}
-              className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+              className="glass-input text-xs rounded-xl px-3 py-2.5 cursor-pointer font-medium"
             >
               <option value="all">💡 All {selectedCategoryFilter}</option>
               {availableSubcategories.map(sub => (
-                <option key={sub} value={sub}>{sub}</option>
+                <option key={sub} value={sub} className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}>
+                  {sub}
+                </option>
               ))}
             </select>
           )}
@@ -220,43 +212,49 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           <select
             value={selectedTypeFilter}
             onChange={(e) => setSelectedTypeFilter(e.target.value)}
-            className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className="glass-input text-xs rounded-xl px-3 py-2.5 cursor-pointer font-medium"
           >
             <option value="all">🔧 All Types</option>
             {TYPES.map(t => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t} className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}>
+                {t}
+              </option>
             ))}
           </select>
 
         </div>
 
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
           <select
             value={sortBy}
             onChange={(e: any) => setSortBy(e.target.value)}
-            className="glass-input text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+            className="glass-input text-xs rounded-xl px-3 py-2 cursor-pointer font-medium"
           >
             <option value="date-desc">📅 Newest First</option>
             <option value="date-asc">📅 Oldest First</option>
             <option value="cost-desc">💲 Highest Cost</option>
           </select>
 
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 cursor-pointer select-none">
+          <label className={`flex items-center gap-2 text-xs font-bold cursor-pointer select-none ${
+            isDark ? 'text-slate-300' : 'text-slate-700'
+          }`}>
             <input
               type="checkbox"
               checked={taxDeductibleOnly}
               onChange={(e) => setTaxDeductibleOnly(e.target.checked)}
-              className="w-4 h-4 rounded text-emerald-500 bg-slate-900 border-slate-700 focus:ring-emerald-500"
+              className="w-4 h-4 rounded text-emerald-500 border-slate-300 focus:ring-emerald-500"
             />
-            <Landmark className="w-3.5 h-3.5 text-amber-400" />
-            Tax-Deductible Only
+            <Landmark className="w-3.5 h-3.5 text-amber-500" />
+            Tax Deductible Only
           </label>
         </div>
 
         {/* Filter Summary & Total Bar */}
-        <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800">
-          <span>Showing <strong className="text-emerald-400">{filteredRecords.length}</strong> log entries</span>
-          <span>Total Expenses: <strong className="text-white font-mono text-sm">${totalFilteredCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+        <div className={`flex items-center justify-between text-xs pt-3 border-t ${
+          isDark ? 'border-slate-800 text-slate-400' : 'border-slate-100 text-slate-500'
+        }`}>
+          <span>Showing <strong className="text-emerald-600 dark:text-emerald-400">{filteredRecords.length}</strong> log entries</span>
+          <span>Total Expenses: <strong className="text-slate-900 dark:text-white font-mono text-sm">${totalFilteredCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
         </div>
       </div>
 
@@ -273,15 +271,17 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
             return (
               <div
                 key={record.id}
-                className="glass-card p-5 rounded-2xl border border-slate-800 hover:border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+                className="glass-card p-5 rounded-3xl transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 group"
               >
 
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shrink-0 mt-0.5">
+                <div className="flex items-start gap-4 min-w-0">
+                  <div className={`p-3 rounded-2xl border shrink-0 mt-0.5 ${
+                    isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                  }`}>
                     <History className="w-5 h-5" />
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       {record.target && record.target !== 'Property' && (
                         <span className={`flex items-center gap-1 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md border ${targetStyles.bg} ${targetStyles.border} ${targetStyles.text}`}>
@@ -289,23 +289,25 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                           <span>{record.target}</span>
                         </span>
                       )}
-                      <h3 className="font-bold text-base text-white">
+                      <h3 className={`font-extrabold text-base truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         {record.category}
                         {record.subcategory && (
-                          <span className="text-slate-400 font-semibold"> · {record.subcategory}</span>
+                          <span className={`font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                            {' '}· {record.subcategory}
+                          </span>
                         )}
                       </h3>
-                      <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md ${
-                        record.type === 'Repair' ? 'bg-red-950 text-red-400 border border-red-800' :
-                        record.type === 'Maintenance' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
-                        record.type === 'Upgrade' ? 'bg-purple-950 text-purple-400 border border-purple-800' :
-                        record.type === 'Expense' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
-                        'bg-slate-800 text-slate-300'
+                      <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md border ${
+                        record.type === 'Repair' ? 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30' :
+                        record.type === 'Maintenance' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' :
+                        record.type === 'Upgrade' ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30' :
+                        record.type === 'Expense' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' :
+                        'bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30'
                       }`}>
                         {record.type}
                       </span>
                       {record.isTaxDeductible && (
-                        <span className="flex items-center gap-1 text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md bg-amber-950 text-amber-400 border border-amber-800">
+                        <span className="flex items-center gap-1 text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
                           <Landmark className="w-3 h-3" />
                           Tax Deductible
                         </span>
@@ -313,65 +315,65 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
                     </div>
 
                     {home && (
-                      <p className="text-xs font-semibold text-emerald-400">
-                        🏠 {home.nickname}
+                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <span>🏠 {home.nickname}</span>
                       </p>
                     )}
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-                      <span>📅 {record.date}</span>
-                      {record.provider && (
-                        <>
-                          <span>•</span>
-                          <span>🔧 {record.provider}</span>
-                        </>
-                      )}
-                    </div>
+                    {record.provider && (
+                      <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        Provider: <strong>{record.provider}</strong>
+                      </p>
+                    )}
 
                     {record.notes && (
-                      <p className="text-xs text-slate-300 mt-2 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80">
-                        {record.notes}
+                      <p className={`text-xs line-clamp-2 italic ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                        "{record.notes}"
                       </p>
                     )}
 
-                    <div className="pt-1 flex items-center gap-2 text-xs text-slate-400">
-                      <span>💳 {record.paymentType}</span>
-                      <span>• 🕐 {record.time}</span>
-                    </div>
-
-                    {/* Multi-User Audit Badges */}
-                    {record.loggedBy && (
-                      <div className="pt-1 flex items-center gap-2 text-[11px] text-slate-500">
-                        <span>👤 Logged by <strong className="text-slate-400">{record.loggedBy.displayName}</strong></span>
-                        {record.lastEditedBy && record.lastEditedBy.uid !== record.loggedBy.uid && (
-                          <span>• ✏️ Edited by <strong className="text-slate-400">{record.lastEditedBy.displayName}</strong></span>
+                    {/* Multi-User Audit Tracking Info */}
+                    {(record.loggedBy || record.lastEditedBy) && (
+                      <div className={`p-1.5 rounded-xl border inline-flex flex-wrap items-center gap-2 text-[10px] mt-1 ${
+                        isDark ? 'bg-slate-950/60 border-slate-800/80 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                      }`}>
+                        {record.loggedBy && (
+                          <span>👤 Logged by <strong className={isDark ? 'text-slate-200' : 'text-slate-800'}>{record.loggedBy.displayName}</strong></span>
+                        )}
+                        {record.lastEditedBy && record.lastEditedBy.uid !== record.loggedBy?.uid && (
+                          <span>✏️ Edited by <strong className={isDark ? 'text-slate-300' : 'text-slate-700'}>{record.lastEditedBy.displayName}</strong></span>
                         )}
                       </div>
                     )}
-
                   </div>
                 </div>
 
-                {/* Right Side: Cost & Actions */}
-                <div className="flex md:flex-col items-center md:items-end justify-between gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-800">
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block font-medium">Cost</span>
-                    <span className="text-xl font-extrabold text-white font-mono">
-                      ${record.cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {/* Right side: Amount, Date, Actions */}
+                <div className="flex md:flex-col items-end justify-between md:justify-center gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-800/40">
+                  <div className="text-left md:text-right">
+                    <span className={`text-xl font-extrabold font-mono block ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      ${record.cost.toFixed(2)}
+                    </span>
+                    <span className={`text-xs font-mono block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {record.date}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1 no-print">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => onEditRecord(record)}
-                      className="p-2 text-slate-400 hover:text-emerald-400 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all"
-                      title="Edit Log Entry"
+                      className={`p-2 rounded-xl transition-colors ${
+                        isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                      }`}
+                      title="Edit Record"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => onDeleteRecord(record.id)}
-                      className="p-2 text-slate-400 hover:text-red-400 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 transition-all"
+                      className={`p-2 rounded-xl transition-colors ${
+                        isDark ? 'text-slate-400 hover:text-red-400 hover:bg-slate-800' : 'text-slate-500 hover:text-red-600 hover:bg-red-50'
+                      }`}
                       title="Delete Record"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -384,18 +386,8 @@ export const RecordHistory: React.FC<RecordHistoryProps> = ({
           })}
         </div>
       ) : (
-        <div className="text-center py-16 glass-panel rounded-3xl">
-          <History className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-white mb-1">No Log Entries Found</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
-            No log entries match your current search or filter criteria.
-          </p>
-          <button
-            onClick={onOpenAddService}
-            className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition-all"
-          >
-            + Add New Log Entry
-          </button>
+        <div className="glass-panel p-12 text-center rounded-3xl text-slate-400 dark:text-slate-500 text-sm">
+          No records match your selected filters.
         </div>
       )}
 
