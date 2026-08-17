@@ -102,6 +102,534 @@ export interface TaxonomyMeta {
   taxGuidance?: string;
 }
 
+export interface TaxGuidance {
+  /** Short summary of tax filing treatment/purpose */
+  purpose: string;
+  /** Relevant IRS Schedule or Form (e.g. Schedule A, Schedule C, Schedule E, Form 1040, Form 5695) */
+  scheduleOrForm?: string;
+  /** High level deductibility indicator */
+  deductibleStatus?: 'deductible' | 'partial' | 'non-deductible' | 'capitalized' | 'taxable-income' | 'tax-credit';
+  /**
+   * Override guidance to show when the linked Property is confirmed NOT to be a rental/income
+   * property — strips out the rental-only (Schedule E) treatment that wouldn't apply.
+   */
+  personalUse?: {
+    purpose: string;
+    scheduleOrForm?: string;
+    deductibleStatus?: TaxGuidance['deductibleStatus'];
+  };
+}
+
+/**
+ * Resolves which variant of a guidance entry to display. When the linked property is known
+ * (isRentalProperty is a boolean, not null/undefined) and is NOT a rental, swaps in the
+ * personalUse variant if one is defined so rental-only treatment isn't shown as applicable.
+ */
+export const resolveTaxGuidance = (
+  guidance: TaxGuidance | null | undefined,
+  isRentalProperty?: boolean | null
+): TaxGuidance | null => {
+  if (!guidance) return null;
+  if (isRentalProperty === false && guidance.personalUse) {
+    const { personalUse, ...base } = guidance;
+    return { ...base, ...personalUse };
+  }
+  return guidance;
+};
+
+export const CATEGORY_TAX_GUIDANCE: Record<string, TaxGuidance> = {
+  'Mortgage & Rent': {
+    purpose: 'Mortgage interest is itemized on Schedule A; rent is deductible for rentals (Schedule E) or home office (Schedule C).',
+    scheduleOrForm: 'Schedule A / Schedule E',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Mortgage interest is itemized on Schedule A (Form 1098, up to $750k debt limit); rent paid for a personal residence is non-deductible.',
+      scheduleOrForm: 'Schedule A Line 8a',
+      deductibleStatus: 'partial'
+    }
+  },
+  'Tax': {
+    purpose: 'State & local real estate taxes itemized on Schedule A (SALT, $10k cap) or 100% deductible on Schedule E for rentals.',
+    scheduleOrForm: 'Schedule A (SALT) / Schedule E',
+    deductibleStatus: 'deductible',
+    personalUse: {
+      purpose: 'State & local real estate taxes itemized on Schedule A, subject to the $10k SALT cap.',
+      scheduleOrForm: 'Schedule A Line 5b (SALT)',
+      deductibleStatus: 'partial'
+    }
+  },
+  'Utilities': {
+    purpose: '100% deductible for rental properties (Schedule E) or prorated for home office (Schedule C); non-deductible for personal home.',
+    scheduleOrForm: 'Schedule E / Schedule C',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal home, unless a portion qualifies for the home office deduction on Schedule C.',
+      scheduleOrForm: 'Schedule C (Home Office)',
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Insurance': {
+    purpose: 'Hazard & flood insurance deductible on Schedule E for rentals; non-deductible for personal residence.',
+    scheduleOrForm: 'Schedule E (Rentals)',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Maintenance & Repairs': {
+    purpose: 'Current-year repairs to keep property in operating condition (Schedule E / Schedule C); distinct from capital improvements.',
+    scheduleOrForm: 'Schedule E / Schedule C',
+    deductibleStatus: 'deductible',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence; repairs only affect cost basis if part of a larger capital improvement.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Improvements & Renovations': {
+    purpose: 'Capital expenditures added to cost basis (reduces future capital gains tax on sale) or depreciated on Schedule E.',
+    scheduleOrForm: 'Cost Basis / Form 4562',
+    deductibleStatus: 'capitalized',
+    personalUse: {
+      purpose: 'Capital expenditures added to cost basis, reducing future capital gains tax on sale; no current-year depreciation for a personal residence.',
+      scheduleOrForm: 'Cost Basis',
+      deductibleStatus: 'capitalized'
+    }
+  },
+  'Furnishings & Appliances': {
+    purpose: 'Depreciable assets (5-7 yr property, Section 179/MACRS) for rentals/offices; personal furniture is non-deductible.',
+    scheduleOrForm: 'Schedule E / Form 4562',
+    deductibleStatus: 'capitalized',
+    personalUse: {
+      purpose: 'Non-deductible personal furniture and appliances.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Services': {
+    purpose: 'Property maintenance, cleaning, and security deductible on Schedule E (rentals) or Schedule C (business).',
+    scheduleOrForm: 'Schedule E / Schedule C',
+    deductibleStatus: 'deductible',
+    personalUse: {
+      purpose: 'Non-deductible for personal residence upkeep.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Solar': {
+    purpose: 'Residential Clean Energy Credit (Form 5695, 30% tax credit); SREC sales reportable as taxable other income.',
+    scheduleOrForm: 'Form 5695 / Form 1040',
+    deductibleStatus: 'tax-credit'
+  }
+};
+
+export const SUBCATEGORY_TAX_GUIDANCE: Record<string, TaxGuidance> = {
+  // Property — Mortgage & Rent
+  'Mortgage Payment': {
+    purpose: 'Interest portion is deductible on Schedule A (Form 1098, up to $750k debt limit); principal is non-deductible.',
+    scheduleOrForm: 'Schedule A Line 8a (Form 1098)',
+    deductibleStatus: 'deductible'
+  },
+  'Rent Payment': {
+    purpose: 'Non-deductible for personal home; 100% deductible on Schedule E (rental property) or Schedule C (home office).',
+    scheduleOrForm: 'Schedule E Line 8 / Schedule C',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Rent paid for a personal residence is non-deductible.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'HOA / Condo Fees': {
+    purpose: 'Non-deductible for personal residence; 100% deductible on Schedule E for rental properties.',
+    scheduleOrForm: 'Schedule E Line 19',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+
+  // Property — Tax
+  'Property Tax': {
+    purpose: 'State & local property taxes deductible on Schedule A (subject to $10k SALT cap) or 100% on Schedule E (rentals).',
+    scheduleOrForm: 'Schedule A Line 5b (SALT) / Schedule E',
+    deductibleStatus: 'deductible',
+    personalUse: {
+      purpose: 'Deductible on Schedule A, subject to the $10k SALT cap.',
+      scheduleOrForm: 'Schedule A Line 5b (SALT)',
+      deductibleStatus: 'partial'
+    }
+  },
+  'School District Tax': {
+    purpose: 'Local school taxes deductible under real estate taxes on Schedule A (SALT cap) or Schedule E.',
+    scheduleOrForm: 'Schedule A Line 5b (SALT) / Schedule E',
+    deductibleStatus: 'deductible',
+    personalUse: {
+      purpose: 'Deductible under real estate taxes on Schedule A, subject to the SALT cap.',
+      scheduleOrForm: 'Schedule A Line 5b (SALT)',
+      deductibleStatus: 'partial'
+    }
+  },
+  'Special Assessment': {
+    purpose: 'Local assessments for improvements (sidewalks, sewer lines) are added to property cost basis; maintenance assessments are deductible on Schedule E.',
+    scheduleOrForm: 'Cost Basis / Schedule E',
+    deductibleStatus: 'capitalized',
+    personalUse: {
+      purpose: 'Assessments for improvements are added to property cost basis; maintenance assessments are non-deductible for a personal residence.',
+      scheduleOrForm: 'Cost Basis',
+      deductibleStatus: 'capitalized'
+    }
+  },
+  'County & City Tax': {
+    purpose: 'County/municipal property taxes deductible on Schedule A (SALT limit) or Schedule E.',
+    scheduleOrForm: 'Schedule A Line 5b / Schedule E',
+    deductibleStatus: 'deductible',
+    personalUse: {
+      purpose: 'Deductible on Schedule A, subject to the SALT cap.',
+      scheduleOrForm: 'Schedule A Line 5b',
+      deductibleStatus: 'partial'
+    }
+  },
+  'Transfer Tax': {
+    purpose: 'Closing transfer taxes are added to purchase basis (lowers future capital gains) or subtracted from sale proceeds.',
+    scheduleOrForm: 'Cost Basis / Form 8949',
+    deductibleStatus: 'capitalized'
+  },
+  'Supplemental Property Tax': {
+    purpose: 'Supplemental tax bills from property re-assessment; deductible on Schedule A (SALT) or Schedule E.',
+    scheduleOrForm: 'Schedule A Line 5b (SALT) / Schedule E',
+    deductibleStatus: 'deductible',
+    personalUse: {
+      purpose: 'Supplemental tax bills from property re-assessment; deductible on Schedule A, subject to the SALT cap.',
+      scheduleOrForm: 'Schedule A Line 5b (SALT)',
+      deductibleStatus: 'partial'
+    }
+  },
+
+  // Property — Utilities
+  'Electricity': {
+    purpose: 'Deductible on Schedule E for rentals or Schedule C for home office; non-deductible for personal use.',
+    scheduleOrForm: 'Schedule E Line 17 / Schedule C',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for personal use, unless a portion qualifies for the home office deduction on Schedule C.',
+      scheduleOrForm: 'Schedule C (Home Office)',
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Natural Gas': {
+    purpose: 'Deductible on Schedule E for rentals or Schedule C for home office; non-deductible for personal use.',
+    scheduleOrForm: 'Schedule E Line 17 / Schedule C',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for personal use, unless a portion qualifies for the home office deduction on Schedule C.',
+      scheduleOrForm: 'Schedule C (Home Office)',
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Water & Sewer': {
+    purpose: 'Deductible on Schedule E for rentals; non-deductible for personal residence.',
+    scheduleOrForm: 'Schedule E Line 17',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Trash & Recycling': {
+    purpose: 'Deductible on Schedule E for rentals; non-deductible for personal residence.',
+    scheduleOrForm: 'Schedule E Line 17',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Internet': {
+    purpose: 'Business/home office portion deductible on Schedule C or Schedule E; personal portion non-deductible.',
+    scheduleOrForm: 'Schedule C Line 22 / Schedule E',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'The home-office portion may be deductible on Schedule C; the personal-use portion is non-deductible.',
+      scheduleOrForm: 'Schedule C Line 22',
+      deductibleStatus: 'partial'
+    }
+  },
+  'Cable / Streaming': {
+    purpose: 'Deductible on Schedule E if provided as a tenant amenity; non-deductible for personal residence.',
+    scheduleOrForm: 'Schedule E Line 19',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+
+  // Property — Insurance
+  'Homeowners Insurance': {
+    purpose: '100% deductible on Schedule E for rentals; non-deductible on Schedule A for personal home.',
+    scheduleOrForm: 'Schedule E Line 9',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal home.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Renters Insurance': {
+    purpose: 'Deductible on Schedule C for business portion (home office); non-deductible for personal use.',
+    scheduleOrForm: 'Schedule C (Home Office)',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for personal use, unless a portion qualifies for the home office deduction.',
+      scheduleOrForm: 'Schedule C (Home Office)',
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Flood Insurance': {
+    purpose: '100% deductible on Schedule E for rental properties; non-deductible for personal residence.',
+    scheduleOrForm: 'Schedule E Line 9',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Home Warranty': {
+    purpose: '100% deductible on Schedule E for rental properties; non-deductible for personal residence.',
+    scheduleOrForm: 'Schedule E Line 9',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+
+  // Property — Maintenance & Repairs
+  'Plumbing': {
+    purpose: 'Current-year repair expense on Schedule E for rentals; non-deductible for personal home.',
+    scheduleOrForm: 'Schedule E Line 14',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal home.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Electrical': {
+    purpose: 'Current-year repair expense on Schedule E for rentals; non-deductible for personal home.',
+    scheduleOrForm: 'Schedule E Line 14',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal home.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'HVAC': {
+    purpose: 'Routine servicing is deductible on Schedule E; full system replacement must be capitalized & depreciated (27.5 yr).',
+    scheduleOrForm: 'Schedule E Line 14 / Form 4562',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal home; a full system replacement may add to cost basis when the home is sold.',
+      scheduleOrForm: 'Cost Basis',
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Roofing': {
+    purpose: 'Roof patching/repairs deductible on Schedule E; complete roof replacement is capitalized & depreciated.',
+    scheduleOrForm: 'Schedule E Line 14 / Form 4562',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible repairs for a personal home; a full roof replacement adds to cost basis.',
+      scheduleOrForm: 'Cost Basis',
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Pest Control': {
+    purpose: 'Operating maintenance expense deductible on Schedule E for rentals; non-deductible for personal home.',
+    scheduleOrForm: 'Schedule E Line 14',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal home.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'General Handyman': {
+    purpose: 'Current-year repairs deductible on Schedule E (rentals) or Schedule C (business); non-deductible for personal home.',
+    scheduleOrForm: 'Schedule E Line 14 / Schedule C',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal home.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+
+  // Property — Improvements & Renovations
+  'Remodeling': {
+    purpose: 'Capital improvement added to property basis (lowers taxable gain on sale) or depreciated over 27.5 yrs on Schedule E.',
+    scheduleOrForm: 'Cost Basis / Form 4562',
+    deductibleStatus: 'capitalized',
+    personalUse: {
+      purpose: 'Capital improvement added to property basis, lowering taxable gain on sale; no current-year depreciation for a personal residence.',
+      scheduleOrForm: 'Cost Basis',
+      deductibleStatus: 'capitalized'
+    }
+  },
+  'Landscaping': {
+    purpose: 'Permanent landscape architecture adds to cost basis; routine lawn care is an operating expense on Schedule E.',
+    scheduleOrForm: 'Cost Basis / Schedule E',
+    deductibleStatus: 'capitalized',
+    personalUse: {
+      purpose: 'Permanent landscape architecture adds to cost basis; routine lawn care is a non-deductible personal expense.',
+      scheduleOrForm: 'Cost Basis',
+      deductibleStatus: 'capitalized'
+    }
+  },
+  'Painting': {
+    purpose: 'Rental repainting is deductible repair on Schedule E; full pre-sale renovation adds to cost basis.',
+    scheduleOrForm: 'Schedule E Line 14 / Cost Basis',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for routine upkeep of a personal home; a full pre-sale renovation adds to cost basis.',
+      scheduleOrForm: 'Cost Basis',
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Flooring': {
+    purpose: 'New flooring is a capital improvement added to property basis or depreciated over 27.5 yrs on Schedule E.',
+    scheduleOrForm: 'Cost Basis / Form 4562',
+    deductibleStatus: 'capitalized',
+    personalUse: {
+      purpose: 'New flooring is a capital improvement added to property basis; no current-year depreciation for a personal residence.',
+      scheduleOrForm: 'Cost Basis',
+      deductibleStatus: 'capitalized'
+    }
+  },
+
+  // Property — Furnishings & Appliances
+  'Furniture': {
+    purpose: 'Depreciable over 5–7 yrs (Section 179 / bonus depreciation eligible) for rental properties or office.',
+    scheduleOrForm: 'Form 4562 / Schedule E',
+    deductibleStatus: 'capitalized',
+    personalUse: {
+      purpose: 'Non-deductible personal furniture.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Major Appliances': {
+    purpose: 'Depreciable over 5 yrs (MACRS / Section 179) for rental properties on Schedule E.',
+    scheduleOrForm: 'Form 4562 / Schedule E',
+    deductibleStatus: 'capitalized',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Home Decor': {
+    purpose: 'Staging or rental decor deductible on Schedule E; non-deductible for personal home.',
+    scheduleOrForm: 'Schedule E Line 19',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal home.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Small Appliances': {
+    purpose: 'De minimis safe harbor expensing (<$2,500) on Schedule E for rental units; non-deductible for personal use.',
+    scheduleOrForm: 'Schedule E Line 19',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for personal use.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+
+  // Property — Services
+  'Cleaning Service': {
+    purpose: 'Turnover & maintenance cleaning deductible on Schedule E (rentals) or Schedule C (business).',
+    scheduleOrForm: 'Schedule E Line 19 / Schedule C',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for personal residence cleaning.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Lawn Care': {
+    purpose: 'Routine yard maintenance deductible on Schedule E for rentals; non-deductible for personal residence.',
+    scheduleOrForm: 'Schedule E Line 19',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for a personal residence.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Security System': {
+    purpose: 'Alarm monitoring deductible on Schedule E (rentals) or Schedule C (office); personal use non-deductible.',
+    scheduleOrForm: 'Schedule E Line 19 / Schedule C',
+    deductibleStatus: 'partial',
+    personalUse: {
+      purpose: 'Non-deductible for personal use.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Moving Services': {
+    purpose: 'Non-deductible for individuals under TCJA (except active-duty military); rental acquisition moves added to basis.',
+    scheduleOrForm: 'Non-deductible / Cost Basis',
+    deductibleStatus: 'non-deductible',
+    personalUse: {
+      purpose: 'Non-deductible for individuals under TCJA (except active-duty military).',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+  'Mailbox Rental': {
+    purpose: 'Deductible business address on Schedule C or property management address on Schedule E.',
+    scheduleOrForm: 'Schedule C Line 18 / Schedule E',
+    deductibleStatus: 'deductible',
+    personalUse: {
+      purpose: 'Non-deductible personal mailbox rental.',
+      scheduleOrForm: undefined,
+      deductibleStatus: 'non-deductible'
+    }
+  },
+
+  // Property — Solar
+  'SREC': {
+    purpose: 'SREC sales reported as taxable other income (Form 1040 Schedule 1); clean energy equipment receives 30% credit on Form 5695.',
+    scheduleOrForm: 'Schedule 1 / Form 5695',
+    deductibleStatus: 'taxable-income'
+  }
+};
+
+export const getCategoryTaxGuidance = (category?: string | null): TaxGuidance | null => {
+  if (!category) return null;
+  return CATEGORY_TAX_GUIDANCE[category] || null;
+};
+
+export const getSubcategoryTaxGuidance = (subcategory?: string | null): TaxGuidance | null => {
+  if (!subcategory) return null;
+  return SUBCATEGORY_TAX_GUIDANCE[subcategory] || null;
+};
+
 export const CATEGORY_META: Record<string, TaxonomyMeta> = {
   'Mortgage & Rent': {
     icon: Banknote,

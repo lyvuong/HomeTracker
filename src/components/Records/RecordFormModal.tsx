@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  X, Save, Wrench, BellPlus, Landmark, Settings2, Home as HomeIcon,
-  Calendar, Clock, DollarSign, Tag, User, FileText, ChevronDown,
-  RotateCcw, Receipt, Link2Off, Sun, Moon
+  X, Save, BellPlus, Landmark, Settings2, Home as HomeIcon,
+  Calendar, Clock, DollarSign, Tag, User, FileText,
+  RotateCcw, Receipt, Link2Off, Sun, Moon, Check
 } from 'lucide-react';
 import type { Home, EnrichedHomeRecord, MaintenanceCategory, MaintenanceType, PaymentType, PaymentTypeItem, Target, TaxonomyOverrideDoc } from '../../types';
 import {
-  TYPES,
   getEffectiveCategoriesForTarget,
   getEffectiveSubcategoriesForTarget,
   CATEGORY_COLORS,
+  COLOR_STYLES,
   getCategoryMeta,
-  getSubcategoryIcon
+  getSubcategoryIcon,
+  getCategoryTaxGuidance,
+  getSubcategoryTaxGuidance,
+  resolveTaxGuidance
 } from '../../constants/categories';
 
 interface TaxTreatmentAdvice {
@@ -439,21 +442,10 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
     setIsTaxDeductible(advice.isDeductibleDefault);
   };
 
-  const handleTypeChange = (newType: MaintenanceType) => {
-    setType(newType);
-    const advice = getTaxTreatmentAdvice(isIncomeProp, category, newType, isDark, transactionType);
-    setIsTaxDeductible(advice.isDeductibleDefault);
-  };
-
   const handleTransactionTypeChange = (newDirection: 'Debit' | 'Credit') => {
     setTransactionType(newDirection);
     const advice = getTaxTreatmentAdvice(isIncomeProp, category, type, isDark, newDirection);
     setIsTaxDeductible(advice.isDeductibleDefault);
-  };
-
-  const handleAddCost = (amountToAdd: number) => {
-    const currentNum = typeof cost === 'number' ? cost : 0;
-    setCost(Math.max(0, Math.round((currentNum + amountToAdd) * 100) / 100));
   };
 
   const handleSetQuickDate = (preset: 'today' | 'yesterday') => {
@@ -684,137 +676,89 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-12 gap-2 items-center">
-                
-                {/* Cost Input Box */}
-                <div className="col-span-12 sm:col-span-7">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
-                      transactionType === 'Credit'
-                        ? isDark ? 'text-emerald-300' : 'text-emerald-900'
-                        : isDark ? 'text-slate-400' : 'text-slate-700'
-                    }`}>
-                      <DollarSign className={`w-3 h-3 ${transactionType === 'Credit' ? 'text-emerald-400' : isDark ? 'text-slate-400' : 'text-slate-600'}`} />
-                      {transactionType === 'Credit' ? 'Credit / Income Amount' : 'Expense Amount'}{' '}
-                      <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
-                    </label>
-                    {typeof cost === 'number' && cost > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setCost('')}
-                        className={`text-[9px] font-semibold flex items-center gap-0.5 px-1 py-0.2 rounded border ${
-                          isDark 
-                            ? 'text-slate-400 bg-slate-900 border-slate-800' 
-                            : 'text-slate-500 bg-white border-slate-200'
-                        }`}
-                      >
-                        <RotateCcw className="w-2.5 h-2.5" /> Clear
-                      </button>
-                    )}
-                  </div>
-                  <div className="relative flex items-center">
-                    <span className={`text-xl font-extrabold font-mono select-none mr-1 ${
-                      transactionType === 'Credit'
-                        ? isDark ? 'text-emerald-400' : 'text-emerald-600'
-                        : isDark ? 'text-slate-400' : 'text-slate-700'
-                    }`}>
-                      {transactionType === 'Credit' ? '+$' : '$'}
-                    </span>
-                    <input
-                      ref={costInputRef}
-                      type="number"
-                      required
-                      step="0.01"
-                      min={0}
-                      inputMode="decimal"
-                      placeholder="0.00"
-                      value={cost}
-                      onChange={(e) => setCost(e.target.value === '' ? '' : Number(e.target.value))}
-                      className={`w-full bg-transparent text-xl sm:text-2xl font-black font-mono focus:outline-none tracking-tight ${
+              {/* Cost Input Box */}
+              <div>
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                    transactionType === 'Credit'
+                      ? isDark ? 'text-emerald-300' : 'text-emerald-900'
+                      : isDark ? 'text-slate-400' : 'text-slate-700'
+                  }`}>
+                    <DollarSign className={`w-3 h-3 ${transactionType === 'Credit' ? 'text-emerald-400' : isDark ? 'text-slate-400' : 'text-slate-600'}`} />
+                    {transactionType === 'Credit' ? 'Credit / Income Amount' : 'Expense Amount'}{' '}
+                    <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
+                  </label>
+                  {typeof cost === 'number' && cost > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setCost('')}
+                      className={`text-[9px] font-semibold flex items-center gap-0.5 px-1 py-0.2 rounded border ${
                         isDark 
-                          ? 'text-white placeholder:text-slate-600' 
-                          : 'text-slate-900 placeholder:text-slate-400'
+                          ? 'text-slate-400 bg-slate-900 border-slate-800' 
+                          : 'text-slate-500 bg-white border-slate-200'
                       }`}
-                    />
-                  </div>
+                    >
+                      <RotateCcw className="w-2.5 h-2.5" /> Clear
+                    </button>
+                  )}
                 </div>
-
-                {/* Quick Add Chips */}
-                <div className={`col-span-12 sm:col-span-5 sm:border-l pt-1 sm:pt-0 ${
-                  isDark ? 'sm:border-slate-800 sm:pl-2.5' : 'sm:border-slate-200 sm:pl-2.5'
-                }`}>
-                  <span className={`block text-[9px] font-bold uppercase tracking-wider mb-0.5 ${
-                    isDark ? 'text-slate-500' : 'text-slate-600'
-                  }`}>Quick Add</span>
-                  <div className="flex flex-wrap items-center gap-1">
-                    {[10, 50, 100, 250, 500].map((amt) => (
-                      <button
-                        key={amt}
-                        type="button"
-                        onClick={() => handleAddCost(amt)}
-                        className={`text-[11px] font-semibold px-2 py-0.5 rounded border transition-all active:scale-95 touch-manipulation ${
-                          isDark
-                            ? 'text-slate-300 bg-slate-900 hover:bg-emerald-500/20 border-slate-800'
-                            : 'text-slate-800 bg-white hover:bg-emerald-50 border-slate-200 shadow-2xs'
-                        }`}
-                      >
-                        +${amt}
-                      </button>
-                    ))}
-                  </div>
+                <div className="relative flex items-center">
+                  <span className={`text-xl font-extrabold font-mono select-none mr-1 ${
+                    transactionType === 'Credit'
+                      ? isDark ? 'text-emerald-400' : 'text-emerald-600'
+                      : isDark ? 'text-slate-400' : 'text-slate-700'
+                  }`}>
+                    {transactionType === 'Credit' ? '+$' : '$'}
+                  </span>
+                  <input
+                    ref={costInputRef}
+                    type="number"
+                    required
+                    step="0.01"
+                    min={0}
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={cost}
+                    onChange={(e) => setCost(e.target.value === '' ? '' : Number(e.target.value))}
+                    className={`w-full bg-transparent text-xl sm:text-2xl font-black font-mono focus:outline-none tracking-tight ${
+                      isDark 
+                        ? 'text-white placeholder:text-slate-600' 
+                        : 'text-slate-900 placeholder:text-slate-400'
+                    }`}
+                  />
                 </div>
-
               </div>
             </div>
 
-            {/* ROW 2: Category Chips & Selector */}
-            <div className="space-y-1.5">
+            {/* ROW 2: Category Chips & Selector (Statements PWA style) */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                   isDark ? 'text-slate-300' : 'text-slate-700'
                 }`}>
-                  <Tag className="w-3 h-3 text-amber-500" />
-                  Category <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
+                  <Tag className="w-3.5 h-3.5 text-amber-500" />
+                  Select a Category <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
                 </label>
                 
-                <div className="flex items-center gap-2">
-                  {onManageCategories && (
-                    <button
-                      type="button"
-                      onClick={onManageCategories}
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors ${
-                        isDark ? 'bg-slate-800 text-blue-400 border-slate-700 hover:bg-slate-700' : 'bg-slate-100 text-blue-600 border-slate-200 hover:bg-slate-200'
-                      }`}
-                    >
-                      Manage
-                    </button>
-                  )}
-                  {/* Category Dropdown */}
-                  <div className="relative">
-                    <select
-                      value={category}
-                      onChange={(e) => handleCategoryChange(e.target.value as MaintenanceCategory)}
-                      className={`text-[11px] font-semibold rounded-md py-0.5 px-2 pr-5 border focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer appearance-none truncate max-w-[150px] ${
-                        isDark
-                          ? 'bg-slate-800 text-slate-200 border-slate-700'
-                          : 'bg-slate-100 text-slate-800 border-slate-200'
-                      }`}
-                    >
-                      {effectiveCategories.map((cat) => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-3 h-3 text-slate-400 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-                </div>
+                {onManageCategories && (
+                  <button
+                    type="button"
+                    onClick={onManageCategories}
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border transition-colors ${
+                      isDark ? 'bg-slate-800 text-blue-400 border-slate-700 hover:bg-slate-700' : 'bg-slate-100 text-blue-600 border-slate-200 hover:bg-slate-200'
+                    }`}
+                  >
+                    Manage Categories
+                  </button>
+                )}
               </div>
 
-              {/* Visual Category Chips */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 max-h-36 overflow-y-auto pr-0.5">
+              {/* Category Chips */}
+              <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-0.5 custom-scrollbar">
                 {effectiveCategories.map((catName) => {
                   const isSelected = category === catName;
-                  const catColor = CATEGORY_COLORS[catName] || (isDark ? '#34d399' : '#059669');
                   const meta = getCategoryMeta(catName);
+                  const styles = COLOR_STYLES[meta.colorName] || COLOR_STYLES.indigo;
                   const IconComp = meta.icon;
 
                   return (
@@ -822,120 +766,141 @@ export const RecordFormModal: React.FC<RecordFormModalProps> = ({
                       key={catName}
                       type="button"
                       onClick={() => handleCategoryChange(catName)}
-                      className={`flex items-center gap-1.5 p-1.5 rounded-lg border text-left transition-all active:scale-98 touch-manipulation ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all active:scale-95 touch-manipulation ${
                         isSelected
                           ? isDark
-                            ? 'bg-slate-800 text-white font-bold border-blue-500/60 shadow-xs'
-                            : 'bg-blue-600 text-white font-bold border-blue-600 shadow-xs'
+                            ? `${styles.border} ${styles.bg} ${styles.text} shadow-xs ring-1 ring-emerald-500/30`
+                            : `${styles.border} ${styles.bg} ${styles.text} shadow-xs ring-1 ring-emerald-500/40`
                           : isDark
-                            ? 'bg-slate-950/40 text-slate-400 font-medium border-slate-800 hover:bg-slate-800/50'
-                            : 'bg-slate-50 text-slate-700 font-medium border-slate-200/80 hover:bg-slate-100'
+                            ? 'border-slate-800 bg-slate-900/70 text-slate-300 hover:border-slate-700 hover:bg-slate-800/60'
+                            : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
                       }`}
                     >
-                      <div
-                        className="w-5 h-5 rounded flex items-center justify-center shrink-0"
-                        style={{
-                          backgroundColor: isSelected ? (isDark ? `${catColor}35` : 'rgba(255, 255, 255, 0.25)') : `${catColor}15`,
-                          color: isSelected ? '#ffffff' : catColor
-                        }}
-                      >
-                        <IconComp className="w-3 h-3" />
-                      </div>
-                      <span className="text-[11px] truncate">{catName}</span>
+                      <IconComp className={`w-3.5 h-3.5 ${isSelected ? styles.icon : isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+                      <span>{catName}</span>
+                      {isSelected && <Check className={`w-3 h-3 ${styles.icon}`} />}
                     </button>
                   );
                 })}
               </div>
 
-              {/* Subcategories Pills */}
-              {subcategories.length > 0 && (
-                <div className={`border rounded-lg p-2 mt-1 ${
-                  isDark ? 'bg-slate-950/40 border-slate-800/80' : 'bg-slate-50 border-slate-200'
-                }`}>
-                  <label className={`block text-[9px] font-bold mb-1 uppercase tracking-wider ${
-                    isDark ? 'text-slate-400' : 'text-slate-500'
+              {/* Category Tax Guidance Callout (Statements PWA Style) */}
+              {category && (() => {
+                const guidance = resolveTaxGuidance(getCategoryTaxGuidance(category), isIncomeProp);
+                if (!guidance) return null;
+                return (
+                  <div className={`p-2.5 rounded-xl border text-xs flex items-start gap-2.5 animate-in fade-in duration-200 ${
+                    isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-slate-50/90 border-slate-200'
                   }`}>
-                    {category} Subcategory <span className="font-normal lowercase opacity-70">(optional)</span>
-                  </label>
-                  <div className="flex flex-wrap gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setSubcategory('')}
-                      className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
-                        subcategory === ''
-                          ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 font-bold' : 'bg-blue-100 text-blue-800 border-blue-300 font-bold'
-                          : isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-white text-slate-600 border-slate-200'
-                      }`}
-                    >
-                      None
-                    </button>
-                    {subcategories.map((sub) => {
-                      const SubIcon = getSubcategoryIcon(sub);
-                      const isSubSelected = subcategory === sub;
-                      return (
-                        <button
-                          key={sub}
-                          type="button"
-                          onClick={() => setSubcategory(sub)}
-                          className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors ${
-                            isSubSelected
-                              ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/40 font-bold' : 'bg-blue-100 text-blue-800 border-blue-300 font-bold'
-                              : isDark ? 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200' : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
-                          }`}
-                        >
-                          <SubIcon className="w-3 h-3 text-slate-400 shrink-0" />
-                          <span>{sub}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {/* Tax Guidance note */}
-                  {getCategoryMeta(category).taxGuidance && (
-                    <div className={`mt-2 p-1.5 rounded-md text-[10px] flex items-start gap-1.5 border ${
-                      isDark ? 'bg-blue-950/30 border-blue-800/40 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-800'
-                    }`}>
-                      <Landmark className="w-3 h-3 text-blue-500 shrink-0 mt-0.5" />
-                      <span>{getCategoryMeta(category).taxGuidance}</span>
+                    <div className="h-5 w-5 rounded-md bg-teal-500/15 text-teal-500 dark:text-teal-400 flex items-center justify-center shrink-0 mt-0.5">
+                      <Landmark className="h-3 w-3" />
                     </div>
-                  )}
-                </div>
-              )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`font-bold text-[11px] ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Tax Treatment:</span>
+                        {guidance.scheduleOrForm && (
+                          <span className={`px-2 py-0.2 rounded-full font-mono text-[10px] font-semibold border ${
+                            isDark ? 'bg-slate-800 text-teal-300 border-teal-500/30' : 'bg-teal-50 text-teal-700 border-teal-200'
+                          }`}>
+                            {guidance.scheduleOrForm}
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-[11px] mt-0.5 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {guidance.purpose}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Subcategories Rich Grid (Statements PWA style) */}
+              {subcategories.length > 0 && (() => {
+                const selectedCatMeta = getCategoryMeta(category);
+                const catStyles = COLOR_STYLES[selectedCatMeta.colorName] || COLOR_STYLES.indigo;
+
+                return (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center justify-between">
+                      <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                        isDark ? 'text-slate-300' : 'text-slate-700'
+                      }`}>
+                        <span>Select a Subcategory</span>
+                        <span className="text-[10px] normal-case font-normal opacity-70">(optional)</span>
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-0.5 custom-scrollbar">
+                      {/* None / General Card */}
+                      <button
+                        type="button"
+                        onClick={() => setSubcategory('')}
+                        className={`p-2.5 rounded-xl border text-left transition-all active:scale-98 touch-manipulation ${
+                          subcategory === ''
+                            ? isDark
+                              ? `${catStyles.border} ${catStyles.bg} ${catStyles.text} shadow-xs`
+                              : `${catStyles.border} ${catStyles.bg} ${catStyles.text} shadow-xs`
+                            : isDark
+                              ? 'border-slate-800 bg-slate-950/60 text-slate-300 hover:border-slate-700'
+                              : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className="font-bold text-xs">None / General {category}</div>
+                        <div className={`text-[10px] mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>No specific subcategory tag</div>
+                      </button>
+
+                      {/* Subcategory Cards with Tax Badges & Guidance */}
+                      {subcategories.map((sub) => {
+                        const isSubSelected = subcategory === sub;
+                        const SubIcon = getSubcategoryIcon(sub);
+                        const subGuidance = resolveTaxGuidance(getSubcategoryTaxGuidance(sub), isIncomeProp);
+
+                        return (
+                          <button
+                            key={sub}
+                            type="button"
+                            onClick={() => setSubcategory(sub)}
+                            className={`p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between gap-1.5 active:scale-98 touch-manipulation ${
+                              isSubSelected
+                                ? isDark
+                                  ? `${catStyles.border} ${catStyles.bg} ${catStyles.text} shadow-xs ring-1 ring-emerald-500/30`
+                                  : `${catStyles.border} ${catStyles.bg} ${catStyles.text} shadow-xs ring-1 ring-emerald-500/40`
+                                : isDark
+                                  ? 'border-slate-800 bg-slate-950/60 text-slate-300 hover:border-slate-700 hover:bg-slate-900/60'
+                                  : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-1.5">
+                              <div className="flex items-center space-x-1.5 min-w-0">
+                                {SubIcon && <SubIcon className={`w-3.5 h-3.5 shrink-0 ${isSubSelected ? catStyles.icon : isDark ? 'text-slate-400' : 'text-slate-500'}`} />}
+                                <span className="font-bold text-xs truncate">{sub}</span>
+                              </div>
+                              {subGuidance?.scheduleOrForm && (
+                                <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border shrink-0 font-semibold ${
+                                  isSubSelected
+                                    ? isDark ? 'bg-slate-900/80 border-slate-700 text-teal-300' : 'bg-white/90 border-slate-300 text-teal-700'
+                                    : isDark ? 'bg-slate-900/80 text-slate-400 border-slate-800' : 'bg-white text-slate-500 border-slate-200'
+                                }`}>
+                                  {subGuidance.scheduleOrForm}
+                                </span>
+                              )}
+                            </div>
+                            {subGuidance?.purpose && (
+                              <p className={`text-[10px] leading-snug line-clamp-2 ${
+                                isSubSelected ? (isDark ? 'text-slate-300' : 'text-slate-800') : (isDark ? 'text-slate-400' : 'text-slate-500')
+                              }`}>
+                                {subGuidance.purpose}
+                              </p>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* ROW 3: Record Type Segmented Bar */}
-            <div className="space-y-1">
-              <label className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
-                isDark ? 'text-slate-300' : 'text-slate-700'
-              }`}>
-                <Wrench className="w-3 h-3 text-indigo-500" />
-                Record Type <span className={isDark ? 'text-emerald-400' : 'text-emerald-600'}>*</span>
-              </label>
-              <div className={`grid grid-cols-5 gap-1 p-0.5 rounded-lg border ${
-                isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-slate-100 border-slate-200'
-              }`}>
-                {TYPES.map((t) => {
-                  const isSelected = type === t;
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => handleTypeChange(t)}
-                      className={`py-1 px-1 rounded text-[11px] font-bold text-center transition-all active:scale-95 touch-manipulation truncate ${
-                        isSelected
-                          ? isDark
-                            ? 'bg-slate-800 text-white shadow-xs border-l-2 border-l-emerald-400'
-                            : 'bg-white text-slate-900 shadow-xs border border-slate-200/80'
-                          : isDark
-                            ? 'text-slate-400 hover:text-slate-200'
-                            : 'text-slate-500 hover:text-slate-800'
-                      }`}
-                    >
-                      {t}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
 
             {/* ROW 4: Date & Time Side-by-Side Row */}
             <div className="grid grid-cols-12 gap-2 items-end">
